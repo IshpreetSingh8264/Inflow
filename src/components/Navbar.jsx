@@ -3,10 +3,11 @@ import { Link } from 'react-router-dom';
 import { FiHome, FiRepeat, FiTarget, FiMenu, FiX, FiLogOut } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 
+
 const Navbar = () => {
   // User authentication state (temporary variable)
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  
+// const { isLoggedIn, login, logout } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(null); // "signin" or "signup"
@@ -114,9 +115,9 @@ const Navbar = () => {
               </motion.button>
             </div>
           ) : (
-            <div className="hidden md:flex items-center space-x-3">
+            <div className="hidden  md:flex items-center space-x-3">
               <motion.button 
-                className="px-4 py-2 text-[#6C757D] font-medium text-sm rounded-full transition-colors hover:bg-[#F1F3F5] flex items-center"
+                className="px-4 py-2 text-white bg-[#DC3545]  font-medium text-sm rounded-full transition-colors hover:bg-[#B02A37] flex items-center"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleLogout}
