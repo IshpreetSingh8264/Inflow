@@ -1,7 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { FiSearch, FiUpload, FiFileText, FiArrowRight } from 'react-icons/fi';
 import Navbar from '../components/Navbar';
+
+// Reusable Component for News Item
+const NewsItem = ({ item, variants }) => (
+  <motion.div
+    className="p-4 border border-[#DEE2E6] rounded-lg hover:shadow-md transition-shadow"
+    variants={variants}
+    whileHover={{ x: 5 }}
+    transition={{ duration: 0.2 }}
+  >
+    <h3 className="font-medium text-[#212529]">{item.title}</h3>
+    <p className="text-[#6C757D] mt-1">{item.description}</p>
+    <div className="flex justify-between items-center mt-2 text-sm text-[#ADB5BD]">
+      <span>{item.date}</span>
+      <span>Source: {item.source}</span>
+    </div>
+  </motion.div>
+);
 
 const Dashboard = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(true);
@@ -11,117 +28,60 @@ const Dashboard = () => {
 
   // Check if user is logged in
   useEffect(() => {
-    // This would typically check a token in localStorage or context
-    const checkLoginStatus = () => {
-      const token = localStorage.getItem('token');
-      setIsLoggedIn(!!token);
-    };
-
-    checkLoginStatus();
+    const token = localStorage.getItem('token');
+    setIsLoggedIn(!!token);
   }, []);
 
   // Handle mouse movement for gradient effect
-  const handleMouseMove = (e) => {
+  const handleMouseMove = useCallback((e) => {
     const { currentTarget: target } = e;
     const rect = target.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     setMousePosition({ x, y });
-  };
+  }, []);
 
   // Handle file upload
-  const handleFileChange = (e) => {
+  const handleFileChange = useCallback((e) => {
     const selectedFile = e.target.files[0];
-    if (selectedFile && selectedFile.type === 'text/csv') {
+    if (selectedFile?.type === 'text/csv') {
       setFile(selectedFile);
     } else {
       alert('Please upload a CSV file');
       setFile(null);
       e.target.value = null;
     }
-  };
+  }, []);
 
   // Handle file analysis
-  const handleAnalysis = () => {
+  const handleAnalysis = useCallback(() => {
     if (file) {
-      // Implement file analysis logic here
       console.log('Analyzing file:', file.name);
-      // This would typically send the file to a backend API
     } else {
       alert('Please upload a CSV file first');
     }
-  };
+  }, [file]);
 
-  // News data (static)
+  // Static news data
   const newsItems = [
-    {
-      id: 1,
-      title: 'Financial Markets Update',
-      description: 'Global markets show signs of recovery as inflation rates stabilize.',
-      date: 'May 15, 2023',
-      source: 'Financial Times'
-    },
-    {
-      id: 2,
-      title: 'New Investment Opportunities',
-      description: 'Emerging markets present promising investment opportunities for Q3 2023.',
-      date: 'May 12, 2023',
-      source: 'Bloomberg'
-    },
-    {
-      id: 3,
-      title: 'Personal Finance Tips',
-      description: 'Expert advice on managing personal finances during economic uncertainty.',
-      date: 'May 10, 2023',
-      source: 'Forbes'
-    }
+    { id: 1, title: 'Financial Markets Update', description: 'Global markets show signs of recovery as inflation rates stabilize.', date: 'May 15, 2023', source: 'Financial Times' },
+    { id: 2, title: 'New Investment Opportunities', description: 'Emerging markets present promising investment opportunities for Q3 2023.', date: 'May 12, 2023', source: 'Bloomberg' },
+    { id: 3, title: 'Personal Finance Tips', description: 'Expert advice on managing personal finances during economic uncertainty.', date: 'May 10, 2023', source: 'Forbes' }
   ];
 
   // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { 
-        duration: 0.6,
-        ease: "easeOut"
-      }
-    }
-  };
-
-  const staggerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { duration: 0.4, ease: "easeOut" }
-    }
-  };
+  const containerVariants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } } };
+  const staggerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.2 } } };
+  const itemVariants = { hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } } };
 
   return (
     <div className="min-h-screen bg-[#F8F9FA]">
       <Navbar />
       {isLoggedIn ? (
         <div className="pt-24 px-4 md:px-6 lg:px-8 pb-20">
-          <motion.div
-            className="max-w-7xl mx-auto space-y-8"
-            initial="hidden"
-            animate="visible"
-            variants={staggerVariants}
-          >
+          <motion.div className="max-w-7xl mx-auto space-y-8" initial="hidden" animate="visible" variants={staggerVariants}>
             {/* Search Container */}
-            <motion.div 
+            <motion.div
               className="relative overflow-hidden rounded-2xl shadow-lg"
               variants={containerVariants}
               onMouseMove={handleMouseMove}
@@ -130,9 +90,7 @@ const Dashboard = () => {
               }}
             >
               <div className="bg-gradient-to-r from-[#F8F9FA] via-[#E9ECEF] to-[#F8F9FA] p-8 md:p-12">
-                <h2 className="text-2xl font-bold text-center mb-6 text-[#212529]">
-                  Search Financial Data
-                </h2>
+                <h2 className="text-2xl font-bold text-center mb-6 text-[#212529]">Search Financial Data</h2>
                 <div className="max-w-4xl mx-auto relative">
                   <input
                     type="text"
@@ -154,32 +112,16 @@ const Dashboard = () => {
             </motion.div>
 
             {/* File Upload Container */}
-            <motion.div 
-              className="bg-white rounded-xl shadow-md overflow-hidden"
-              variants={containerVariants}
-            >
+            <motion.div className="bg-white rounded-xl shadow-md overflow-hidden" variants={containerVariants}>
               <div className="p-6 md:p-8">
-                <h2 className="text-xl font-semibold mb-4 text-[#212529]">
-                  Upload Financial Data
-                </h2>
+                <h2 className="text-xl font-semibold mb-4 text-[#212529]">Upload Financial Data</h2>
                 <div className="border-2 border-dashed border-[#DEE2E6] rounded-lg p-6 text-center">
-                  <motion.div
-                    className="flex flex-col items-center"
-                    whileHover={{ scale: 1.02 }}
-                    transition={{ duration: 0.2 }}
-                  >
+                  <motion.div className="flex flex-col items-center" whileHover={{ scale: 1.02 }} transition={{ duration: 0.2 }}>
                     <FiUpload className="text-[#6C757D] mb-3" size={36} />
-                    <p className="mb-4 text-[#495057]">
-                      {file ? `Selected: ${file.name}` : 'Upload a CSV file to analyze your financial data'}
-                    </p>
+                    <p className="mb-4 text-[#495057]">{file ? `Selected: ${file.name}` : 'Upload a CSV file to analyze your financial data'}</p>
                     <div className="flex flex-wrap gap-3 justify-center">
                       <label className="px-4 py-2 bg-[#E9ECEF] text-[#495057] rounded-lg hover:bg-[#DEE2E6] transition-colors cursor-pointer">
-                        <input
-                          type="file"
-                          accept=".csv"
-                          onChange={handleFileChange}
-                          className="hidden"
-                        />
+                        <input type="file" accept=".csv" onChange={handleFileChange} className="hidden" />
                         Choose File
                       </label>
                       <motion.button
@@ -199,35 +141,12 @@ const Dashboard = () => {
             </motion.div>
 
             {/* News Container */}
-            <motion.div 
-              className="bg-white rounded-xl shadow-md overflow-hidden"
-              variants={containerVariants}
-            >
+            <motion.div className="bg-white rounded-xl shadow-md overflow-hidden" variants={containerVariants}>
               <div className="p-6 md:p-8">
-                <h2 className="text-xl font-semibold mb-4 text-[#212529]">
-                  Financial News & Updates
-                </h2>
-                <motion.div 
-                  className="space-y-4"
-                  variants={staggerVariants}
-                  initial="hidden"
-                  animate="visible"
-                >
+                <h2 className="text-xl font-semibold mb-4 text-[#212529]">Financial News & Updates</h2>
+                <motion.div className="space-y-4" variants={staggerVariants} initial="hidden" animate="visible">
                   {newsItems.map((item) => (
-                    <motion.div
-                      key={item.id}
-                      className="p-4 border border-[#DEE2E6] rounded-lg hover:shadow-md transition-shadow"
-                      variants={itemVariants}
-                      whileHover={{ x: 5 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <h3 className="font-medium text-[#212529]">{item.title}</h3>
-                      <p className="text-[#6C757D] mt-1">{item.description}</p>
-                      <div className="flex justify-between items-center mt-2 text-sm text-[#ADB5BD]">
-                        <span>{item.date}</span>
-                        <span>Source: {item.source}</span>
-                      </div>
-                    </motion.div>
+                    <NewsItem key={item.id} item={item} variants={itemVariants} />
                   ))}
                 </motion.div>
               </div>
@@ -250,10 +169,7 @@ const Dashboard = () => {
               className="px-6 py-3 bg-[#007BFF] text-white rounded-lg hover:bg-[#0056B3] transition-colors"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => {
-                // Navigate to login page or open login modal
-                console.log('Navigate to login');
-              }}
+              onClick={() => console.log('Navigate to login')}
             >
               Log In
             </motion.button>
