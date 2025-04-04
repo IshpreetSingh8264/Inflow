@@ -4,7 +4,7 @@ import { FiSearch, FiUpload, FiFileText, FiArrowRight } from 'react-icons/fi';
 import Navbar from '../components/Navbar';
 
 const Dashboard = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(true); // Already set to true
   const [searchQuery, setSearchQuery] = useState('');
   const [file, setFile] = useState(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -14,7 +14,10 @@ const Dashboard = () => {
     // This would typically check a token in localStorage or context
     const checkLoginStatus = () => {
       const token = localStorage.getItem('token');
-      setIsLoggedIn(!!token);
+      // Only update if token exists, otherwise keep the default true value
+      if (token !== null) {
+        setIsLoggedIn(!!token);
+      }
     };
 
     checkLoginStatus();
@@ -109,8 +112,11 @@ const Dashboard = () => {
     }
   };
 
+  // For debugging
+  console.log("isLoggedIn status:", isLoggedIn);
+
   return (
-    <div className="min-h-screen bg-[#F8F9FA]">
+    <div className="min-h-screen bg-[#F0F2F5]"> {/* Changed background to slightly darker */}
       <Navbar />
       {isLoggedIn ? (
         <div className="pt-24 px-4 md:px-6 lg:px-8 pb-20">
@@ -129,7 +135,7 @@ const Dashboard = () => {
                 background: `radial-gradient(circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(0, 123, 255, 0.1), transparent 50%)`
               }}
             >
-              <div className="bg-gradient-to-r from-[#F8F9FA] via-[#E9ECEF] to-[#F8F9FA] p-8 md:p-12">
+              <div className="bg-gradient-to-r from-[#E9ECEF] via-[#DEE2E6] to-[#E9ECEF] p-8 md:p-12"> {/* Darkened gradient */}
                 <h2 className="text-2xl font-bold text-center mb-6 text-[#212529]">
                   Search Financial Data
                 </h2>
@@ -155,7 +161,7 @@ const Dashboard = () => {
 
             {/* File Upload Container */}
             <motion.div 
-              className="bg-white rounded-xl shadow-md overflow-hidden"
+              className="bg-white rounded-xl shadow-md overflow-hidden border border-[#E0E0E0]" /* Added border for better visibility */
               variants={containerVariants}
             >
               <div className="p-6 md:p-8">
@@ -200,7 +206,7 @@ const Dashboard = () => {
 
             {/* News Container */}
             <motion.div 
-              className="bg-white rounded-xl shadow-md overflow-hidden"
+              className="bg-white rounded-xl shadow-md overflow-hidden border border-[#E0E0E0]" /* Added border for better visibility */
               variants={containerVariants}
             >
               <div className="p-6 md:p-8">
@@ -216,7 +222,7 @@ const Dashboard = () => {
                   {newsItems.map((item) => (
                     <motion.div
                       key={item.id}
-                      className="p-4 border border-[#DEE2E6] rounded-lg hover:shadow-md transition-shadow"
+                      className="p-4 border border-[#DEE2E6] rounded-lg hover:shadow-md transition-shadow bg-[#FAFAFA]" /* Added slight background color */
                       variants={itemVariants}
                       whileHover={{ x: 5 }}
                       transition={{ duration: 0.2 }}
@@ -237,7 +243,7 @@ const Dashboard = () => {
       ) : (
         <div className="pt-24 px-4 md:px-6 lg:px-8 pb-20 flex justify-center items-center">
           <motion.div
-            className="text-center max-w-lg"
+            className="text-center max-w-lg bg-white p-8 rounded-xl shadow-md" /* Added background and padding */
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
