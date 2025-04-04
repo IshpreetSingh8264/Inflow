@@ -170,13 +170,19 @@ const TransactionModal = ({ transaction, onSave, onClose }) => {
   return (
     <motion.div 
       className="fixed inset-0 flex items-center justify-center z-50 px-4"
-      initial={{ opacity: 0 }}
+      initial={{ opacity: 1 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={handleBackdropClick}
     >
-      {/* Backdrop with blur effect */}
-      <div className="absolute inset-0 bg-opacity-50 backdrop-blur-sm" />
+      {/* Backdrop with blur effect - improved to appear immediately */}
+      <motion.div 
+        className="absolute inset-0 backdrop-blur-md"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.5 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
+      />
       
       {/* Modal content */}
       <motion.div
