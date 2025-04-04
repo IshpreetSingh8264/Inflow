@@ -162,14 +162,14 @@ const Dashboard = () => {
     const maxValue = Math.max(...data);
     const minValue = Math.min(...data);
     const range = maxValue - minValue;
-
+    
     return (
       <div className="h-12 w-24 flex items-end">
         {data.map((value, index) => {
           const height = range === 0 ? 50 : ((value - minValue) / range) * 100;
           return (
-            <div
-              key={index}
+            <div 
+              key={index} 
               className={`w-1 mx-[1px] rounded-t-sm ${trending === 'up' ? 'bg-green-500' : 'bg-red-500'}`}
               style={{ height: `${height}%` }}
             ></div>
@@ -194,7 +194,7 @@ const Dashboard = () => {
             variants={staggerVariants}
           >
             {/* Search Container with Dynamic Gradient */}
-            <motion.div
+            <motion.div 
               className="relative overflow-hidden rounded-2xl shadow-lg"
               variants={containerVariants}
               onMouseMove={handleMouseMove}
@@ -229,7 +229,7 @@ const Dashboard = () => {
             </motion.div>
 
             {/* File Upload Container */}
-            <motion.div
+            <motion.div 
               className="bg-white rounded-xl shadow-md overflow-hidden border border-[#E0E0E0]"
               variants={containerVariants}
             >
@@ -274,7 +274,7 @@ const Dashboard = () => {
             </motion.div>
 
             {/* Stock Tickers Container - NEW SECTION */}
-            <motion.div
+            <motion.div 
               className="bg-white rounded-xl shadow-md overflow-hidden border border-[#E0E0E0]"
               variants={containerVariants}
             >
@@ -300,7 +300,7 @@ const Dashboard = () => {
                           {stock.trending === 'up' ? <FiTrendingUp size={18} /> : <FiTrendingDown size={18} />}
                         </div>
                       </div>
-
+                      
                       <div className="flex justify-between items-end mt-3">
                         <div>
                           <p className="text-xl font-semibold text-[#212529]">${stock.price.toFixed(2)}</p>
@@ -317,7 +317,7 @@ const Dashboard = () => {
             </motion.div>
 
             {/* News Container */}
-            <motion.div
+            <motion.div 
               className="bg-white rounded-xl shadow-md overflow-hidden border border-[#E0E0E0]"
               variants={containerVariants}
             >
@@ -350,7 +350,7 @@ const Dashboard = () => {
                 </motion.div>
               </div>
             </motion.div>
-          </motion.div>
+            </motion.div>
         </div>
       ) : (
         <div className="pt-24 px-4 md:px-6 lg:px-8 pb-20 flex justify-center items-center">
