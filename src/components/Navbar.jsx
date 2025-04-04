@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FiHome, FiRepeat, FiTarget, FiMenu, FiX } from 'react-icons/fi';
+import { FiHome, FiRepeat, FiTarget, FiMenu, FiX, FiLogOut } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar = () => {
+  // User authentication state (temporary variable)
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(null); // "signin" or "signup"
@@ -38,6 +41,17 @@ const Navbar = () => {
     };
   }, [mobileMenuOpen]);
 
+  // Handle logout
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+  };
+
+  // Handle login (for demo purposes)
+  const handleLogin = () => {
+    setModalOpen(null);
+    setIsLoggedIn(true);
+  };
+
   return (
     <>
       <motion.div 
@@ -47,7 +61,7 @@ const Navbar = () => {
         className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4 py-3"
       >
         <motion.div 
-          className={`flex items-center justify-between w-full max-w-6xl px-6 py-2 rounded-full transition-all duration-300 ${
+          className={`flex items-center justify-between w-full max-w-6xl px-6 py-3 rounded-full transition-all duration-300 ${
             scrolled 
               ? 'bg-white bg-opacity-90 backdrop-blur-sm' 
               : 'bg-white'
@@ -70,32 +84,47 @@ const Navbar = () => {
             </Link>
           </motion.div>
 
-          {/* Navigation Links - Desktop */}
-          <div className="hidden md:flex items-center justify-center space-x-8">
-            <NavLink to="/" icon={<FiHome className="mr-1" />} text="Home" />
-            <NavLink to="/transactions" icon={<FiRepeat className="mr-1" />} text="Transactions" />
-            <NavLink to="/goals" icon={<FiTarget className="mr-1" />} text="Goals" />
-          </div>
+          {/* Navigation Links - Desktop (Only visible when logged in) */}
+          {isLoggedIn && (
+            <div className="hidden md:flex items-center justify-center space-x-8">
+              <NavLink to="/" icon={<FiHome className="mr-1" />} text="Home" />
+              <NavLink to="/transactions" icon={<FiRepeat className="mr-1" />} text="Transactions" />
+              <NavLink to="/goals" icon={<FiTarget className="mr-1" />} text="Goals" />
+            </div>
+          )}
 
-          {/* Auth Buttons - Desktop */}
-          <div className="hidden md:flex items-center space-x-3">
-            <motion.button 
-              className="px-4 py-2 text-[#6C757D] font-medium text-sm rounded-full transition-colors hover:bg-[#F1F3F5]"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setModalOpen('signin')}
-            >
-              Sign In
-            </motion.button>
-            <motion.button 
-              className="px-4 py-2 bg-[#007BFF] text-white font-medium text-sm rounded-full transition-colors hover:bg-[#0056B3]"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setModalOpen('signup')}
-            >
-              Sign Up
-            </motion.button>
-          </div>
+          {/* Auth Buttons - Desktop (Only visible when logged out) */}
+          {!isLoggedIn ? (
+            <div className="hidden md:flex items-center space-x-3">
+              <motion.button 
+                className="px-4 py-2 text-[#6C757D] font-medium text-sm rounded-full transition-colors hover:bg-[#F1F3F5]"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setModalOpen('signin')}
+              >
+                Sign In
+              </motion.button>
+              <motion.button 
+                className="px-4 py-2 bg-[#007BFF] text-white font-medium text-sm rounded-full transition-colors hover:bg-[#0056B3]"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setModalOpen('signup')}
+              >
+                Sign Up
+              </motion.button>
+            </div>
+          ) : (
+            <div className="hidden md:flex items-center space-x-3">
+              <motion.button 
+                className="px-4 py-2 text-[#6C757D] font-medium text-sm rounded-full transition-colors hover:bg-[#F1F3F5] flex items-center"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleLogout}
+              >
+                <FiLogOut className="mr-1" /> Logout
+              </motion.button>
+            </div>
+          )}
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center">
@@ -120,32 +149,50 @@ const Navbar = () => {
               className="absolute top-20 left-4 right-4 bg-white rounded-2xl shadow-xl p-4 md:hidden"
             >
               <div className="flex flex-col space-y-3">
-                <MobileNavLink to="/" icon={<FiHome className="mr-2" />} text="Home" onClick={() => setMobileMenuOpen(false)} />
-                <MobileNavLink to="/transactions" icon={<FiRepeat className="mr-2" />} text="Transactions" onClick={() => setMobileMenuOpen(false)} />
-                <MobileNavLink to="/goals" icon={<FiTarget className="mr-2" />} text="Goals" onClick={() => setMobileMenuOpen(false)} />
-                
-                <div className="pt-3 border-t border-[#DEE2E6] flex flex-col space-y-3">
-                  <motion.button 
-                    className="w-full py-2 text-[#6C757D] font-medium text-sm rounded-full transition-colors hover:bg-[#F1F3F5] flex justify-center"
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      setModalOpen('signin');
-                    }}
-                  >
-                    Sign In
-                  </motion.button>
-                  <motion.button 
-                    className="w-full py-2 bg-[#007BFF] text-white font-medium text-sm rounded-full transition-colors hover:bg-[#0056B3] flex justify-center"
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      setModalOpen('signup');
-                    }}
-                  >
-                    Sign Up
-                  </motion.button>
-                </div>
+                {/* Only show navigation links if logged in */}
+                {isLoggedIn ? (
+                  <>
+                    <MobileNavLink to="/" icon={<FiHome className="mr-2" />} text="Home" onClick={() => setMobileMenuOpen(false)} />
+                    <MobileNavLink to="/transactions" icon={<FiRepeat className="mr-2" />} text="Transactions" onClick={() => setMobileMenuOpen(false)} />
+                    <MobileNavLink to="/goals" icon={<FiTarget className="mr-2" />} text="Goals" onClick={() => setMobileMenuOpen(false)} />
+                    
+                    <div className="pt-3 border-t border-[#DEE2E6]">
+                      <motion.button 
+                        className="w-full py-2 text-[#6C757D] font-medium text-sm rounded-full transition-colors hover:bg-[#F1F3F5] flex items-center justify-center"
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          handleLogout();
+                        }}
+                      >
+                        <FiLogOut className="mr-2" /> Logout
+                      </motion.button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="pt-3 flex flex-col space-y-3">
+                    <motion.button 
+                      className="w-full py-2 text-[#6C757D] font-medium text-sm rounded-full transition-colors hover:bg-[#F1F3F5] flex justify-center"
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        setModalOpen('signin');
+                      }}
+                    >
+                      Sign In
+                    </motion.button>
+                    <motion.button 
+                      className="w-full py-2 bg-[#007BFF] text-white font-medium text-sm rounded-full transition-colors hover:bg-[#0056B3] flex justify-center"
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        setModalOpen('signup');
+                      }}
+                    >
+                      Sign Up
+                    </motion.button>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
@@ -154,17 +201,24 @@ const Navbar = () => {
 
       {/* Authentication Modals */}
       <AnimatePresence>
-        {modalOpen && <AuthModal type={modalOpen} onClose={() => setModalOpen(null)} />}
+        {modalOpen && (
+          <AuthModal 
+            type={modalOpen} 
+            onClose={() => setModalOpen(null)} 
+            onLogin={handleLogin}
+            setModalOpen={setModalOpen}
+          />
+        )}
       </AnimatePresence>
     </>
   );
 };
 
 // Authentication Modal Component
-const AuthModal = ({ type, onClose }) => {
+const AuthModal = ({ type, onClose, onLogin, setModalOpen }) => {
   return (
     <motion.div 
-      className="fixed inset-0 flex items-center justify-center backdrop-blur-md z-50"
+      className="fixed inset-0 flex items-center justify-center backdrop-blur-md  bg-opacity-30 z-50"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -214,6 +268,7 @@ const AuthModal = ({ type, onClose }) => {
             className="w-full py-3 bg-[#007BFF] text-white font-medium rounded-md hover:bg-[#0056B3] transition-colors"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
+            onClick={onLogin} // For demo purposes, both sign in and sign up will log the user in
           >
             {type === 'signin' ? 'Sign In' : 'Create Account'}
           </motion.button>
