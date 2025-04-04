@@ -112,7 +112,6 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-[#F8F9FA]">
       <Navbar />
-      
       {isLoggedIn ? (
         <div className="pt-24 px-4 md:px-6 lg:px-8 pb-20">
           <motion.div
