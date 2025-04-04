@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FiHome, FiRepeat, FiTarget, FiMenu, FiX, FiLogOut, FiInfo, FiMail } from 'react-icons/fi';
+import { FiHome, FiRepeat, FiTarget, FiMenu, FiX, FiLogOut, FiInfo, FiMail, FiPieChart, FiMessageSquare, FiTrendingUp } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 
 
@@ -61,7 +61,7 @@ const Navbar = () => {
         className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4 py-3"
       >
         <motion.div 
-          className={`flex items-center justify-between w-full max-w-6xl px-6 py-3 rounded-full transition-all duration-300 ${
+          className={`flex items-center justify-between w-full max-w-7xl px-8 py-3 rounded-full transition-all duration-300 ${
             scrolled 
               ? 'bg-white bg-opacity-90 backdrop-blur-sm' 
               : 'bg-white'
@@ -86,10 +86,13 @@ const Navbar = () => {
 
           {/* Navigation Links - Desktop (Only visible when logged in) */}
           {isLoggedIn && (
-            <div className="hidden md:flex items-center justify-center space-x-8">
+            <div className="hidden lg:flex items-center justify-center space-x-2 xl:space-x-4">
               <NavLink to="/" icon={<FiHome className="mr-1" />} text="Home" />
               <NavLink to="/transactions" icon={<FiRepeat className="mr-1" />} text="Transactions" />
               <NavLink to="/goals" icon={<FiTarget className="mr-1" />} text="Goals" />
+              <NavLink to="/aichat" icon={<FiMessageSquare className="mr-1" />} text="Ai Chat" />
+              <NavLink to="/analysis" icon={<FiPieChart className="mr-1" />} text="Analysis" />
+              <NavLink to="/aistocks" icon={<FiTrendingUp className="mr-1" />} text="AI Stocks" />
               <NavLink to="/about" icon={<FiInfo className="mr-1" />} text="About Us" />
               <NavLink to="/contact" icon={<FiMail className="mr-1" />} text="Contact Us" />
             </div>
@@ -97,7 +100,7 @@ const Navbar = () => {
 
           {/* Auth Buttons - Desktop (Only visible when logged out) */}
           {!isLoggedIn ? (
-            <div className="hidden md:flex items-center space-x-3">
+            <div className="hidden lg:flex items-center space-x-3">
               <motion.button 
                 className="px-4 py-2 text-[#6C757D] font-medium text-sm rounded-full transition-colors hover:bg-[#F1F3F5]"
                 whileHover={{ scale: 1.05 }}
@@ -116,7 +119,7 @@ const Navbar = () => {
               </motion.button>
             </div>
           ) : (
-            <div className="hidden  md:flex items-center space-x-3">
+            <div className="hidden lg:flex items-center space-x-3">
               <motion.button 
                 className="px-4 py-2 text-white bg-[#DC3545]  font-medium text-sm rounded-full transition-colors hover:bg-[#B02A37] flex items-center"
                 whileHover={{ scale: 1.05 }}
@@ -129,7 +132,7 @@ const Navbar = () => {
           )}
 
           {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center">
+          <div className="lg:hidden flex items-center">
             <motion.button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               whileTap={{ scale: 0.9 }}
@@ -148,7 +151,7 @@ const Navbar = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              className="absolute top-20 left-4 right-4 bg-white rounded-2xl shadow-xl p-4 md:hidden"
+              className="absolute top-20 left-4 right-4 bg-white rounded-2xl shadow-xl p-4 lg:hidden"
             >
               <div className="flex flex-col space-y-3">
                 {/* Only show navigation links if logged in */}
@@ -157,6 +160,9 @@ const Navbar = () => {
                     <MobileNavLink to="/" icon={<FiHome className="mr-2" />} text="Home" onClick={() => setMobileMenuOpen(false)} />
                     <MobileNavLink to="/transactions" icon={<FiRepeat className="mr-2" />} text="Transactions" onClick={() => setMobileMenuOpen(false)} />
                     <MobileNavLink to="/goals" icon={<FiTarget className="mr-2" />} text="Goals" onClick={() => setMobileMenuOpen(false)} />
+                    <MobileNavLink to="/aichat" icon={<FiMessageSquare className="mr-2" />} text="Ai Chat" onClick={() => setMobileMenuOpen(false)} />
+                    <MobileNavLink to="/analysis" icon={<FiPieChart className="mr-2" />} text="Analysis" onClick={() => setMobileMenuOpen(false)} />
+                    <MobileNavLink to="/aistocks" icon={<FiTrendingUp className="mr-2" />} text="AI Stocks" onClick={() => setMobileMenuOpen(false)} />
                     <MobileNavLink to="/about" icon={<FiInfo className="mr-2" />} text="About Us" onClick={() => setMobileMenuOpen(false)} />
                     <MobileNavLink to="/contact" icon={<FiMail className="mr-2" />} text="Contact Us" onClick={() => setMobileMenuOpen(false)} />
                     
@@ -307,7 +313,7 @@ const NavLink = ({ to, icon, text }) => {
     >
       <Link 
         to={to} 
-        className="flex items-center px-3 py-2 text-[#495057] font-medium text-sm rounded-full transition-colors hover:bg-[#F1F3F5] hover:text-[#007BFF]"
+              className="flex items-center px-1.5 py-1 text-[#495057] font-medium text-xs sm:text-sm rounded-full transition-colors hover:bg-[#F1F3F5] hover:text-[#007BFF]"
       >
         {icon}
         {text}

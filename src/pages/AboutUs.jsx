@@ -1,146 +1,177 @@
-import React, { useState } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 
 const AboutUs = () => {
-    return (
-        <div className="bg-[#F8F9FA] text-[#212529]">
-            <Navbar />
-            <div className="pt-24 px-4 md:px-6 lg:px-8 pb-20">
-                {/* Large Centered Image Section */}
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5 }}
-                    className="flex justify-center mt-8"
-                >
-                    <img
-                        src="/images/aboutusinflow.png"
-                        alt="Inflow Overview"
-                        className="max-w-200 rounded-lg"
-                        loading="lazy"
-                    />
-                </motion.div>
+  const sectionVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
+  };
 
-                <div className="bg-[#F8F9FA] text-[#212529] min-h-screen py-24 px-8 sm:px-16 md:px-28 lg:px-40 xl:px-52">
-
-                    {/* Heading Section */}
-                    <motion.div
-                        initial={{ opacity: 0, y: -30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
-                        className="text-center mb-20"
-                    >
-                        <h1 className="text-5xl font-bold text-[#000000] leading-tight">About Inflow</h1>
-                        <p className="text-[#495057] mt-4 text-xl max-w-2xl mx-auto">
-                            AI-powered financial assistant making money management smarter, seamless, and effortless.
-                        </p>
-                    </motion.div>
-
-                    {/* Problem Section */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.1 }}
-                        className="flex flex-col lg:flex-row items-center bg-[#FFFFFF] p-12 rounded-2xl shadow-lg mb-16"
-                    >
-                        <div className="lg:w-1/2">
-                            <h2 className="text-4xl font-semibold text-[#000000]">🚀 The Problem</h2>
-                            <p className="text-[#495057] mt-6 text-lg leading-relaxed">
-                                Managing personal finances is overwhelming. Traditional expense trackers only record transactions but fail to provide meaningful insights.
-                            </p>
-                            <ul className="list-disc mt-6 pl-8 text-[#007BFF] text-lg">
-                                <li>🔹 Scattered financial data (bank accounts, UPI, wallets)</li>
-                                <li>🔹 Lack of intelligent financial guidance</li>
-                                <li>🔹 Inefficient money management leading to poor financial decisions</li>
-                            </ul>
-                        </div>
-                        <div className="lg:w-1/2 flex justify-center mt-8 lg:mt-0">
-                            <img src="/images/2.png" alt="Problem Illustration" className="w-full max-w-lg rounded-xl" loading="lazy" />
-                        </div>
-                    </motion.div>
-
-                    {/* Solution Section */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.2 }}
-                        className="flex flex-col lg:flex-row-reverse items-center bg-[#FFFFFF] p-12 rounded-2xl shadow-lg mb-16"
-                    >
-                        <div className="lg:w-1/2">
-                            <h2 className="text-4xl font-semibold text-[#000000]">💡 The Solution – Inflow</h2>
-                            <p className="text-[#495057] mt-6 text-lg leading-relaxed">
-                                Inflow is an AI-powered smart finance assistant that not only tracks expenses but analyzes spending habits and provides actionable insights.
-                            </p>
-                            <ul className="list-disc mt-6 pl-8 text-[#28A745] text-lg">
-                                <li>✅ Seamless Bank Integration – Auto-fetches bank transactions</li>
-                                <li>✅ AI-Driven Expense Categorization – No manual tagging needed</li>
-                                <li>✅ Personalized Financial Insights – Smart budgeting & investments</li>
-                            </ul>
-                        </div>
-                        <div className="lg:w-1/2 flex justify-center mt-8 lg:mt-0">
-                            <img src="/images/application.png" alt="Solution Illustration" className="w-full max-w-lg rounded-xl" loading="lazy" />
-                        </div>
-                    </motion.div>
-
-                    {/* Market Opportunity */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.3 }}
-                        className="bg-[#FFFFFF] p-12 rounded-2xl shadow-lg mb-16 text-center"
-                    >
-                        <h2 className="text-4xl font-semibold text-[#000000]">🌍 Market Opportunity</h2>
-                        <img src="/images/analytics.png" alt="Market Growth" className="w-full max-w-lg mx-auto my-6 rounded-xl" loading="lazy" />
-                        <p className="text-[#495057] mt-4 text-lg leading-relaxed">
-                            The global personal finance software market is expected to reach **$4,221.1 million by 2032**. Inflow targets a growing user base seeking AI-driven financial tools.
-                        </p>
-                        <p className="text-[#868E96]">Source: alliedmarketresearch.com</p>
-                    </motion.div>
-
-                    {/* Business Model */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.4 }}
-                        className="flex flex-col lg:flex-row items-center bg-[#FFFFFF] p-12 rounded-2xl shadow-lg mb-16"
-                    >
-                        <div className="lg:w-1/2">
-                            <h2 className="text-4xl font-semibold text-[#000000]">💰 Business Model</h2>
-                            <ul className="list-disc mt-6 pl-8 text-[#28A745] text-lg">
-                                <li>💲 **Free Plan**: Expense tracking, AI categorization, bank linking</li>
-                                <li>💎 **Pro Plan ($4.99/month)**: Advanced analytics, financial coaching</li>
-                                <li>🏦 **Enterprise Partnerships**: AI-powered finance tools for banks & fintech</li>
-                            </ul>
-                        </div>
-                        <div className="lg:w-1/2 flex justify-center mt-8 lg:mt-0">
-                            <img src="images/5.png" alt="Business Model" className="w-full max-w-lg rounded-xl" loading="lazy" />
-                        </div>
-                    </motion.div>
-
-                    {/* CTA Section */}
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.5, delay: 0.5 }}
-                        className="text-center mt-20"
-                    >
-                        <h2 className="text-4xl font-semibold text-[#000000]">🚀 Join Us in Transforming Finance!</h2>
-                        <p className="text-[#495057] mt-4 text-lg">
-                            Interested in investing or partnering? Let's talk!
-                        </p>
-                        <Link
-                            to="/contact"
-                            className="mt-6 inline-block bg-[#007BFF] hover:bg-[#0056B3] text-white py-4 px-10 rounded-xl text-xl font-medium transition duration-300"
-                        >
-                            Contact Us
-                        </Link>
-                    </motion.div>
-                </div>
-            </div>
+  return (
+    <div className="bg-[#F8F9FA] text-[#212529] min-h-screen">
+      <Navbar />
+      
+      {/* Hero Section */}
+      <motion.section 
+        className="pt-24 px-4 sm:px-6 md:px-8 lg:px-12 pb-12"
+        initial="hidden"
+        animate="visible"
+        variants={sectionVariants}
+      >
+        <div className="max-w-7xl mx-auto text-center">
+          <motion.h1 
+            className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#000000] mb-6"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            About Inflow
+          </motion.h1>
+          <motion.p 
+            className="text-[#495057] text-lg sm:text-xl max-w-2xl mx-auto"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            AI-powered financial assistant making money management smarter, seamless, and effortless.
+          </motion.p>
         </div>
-    );
+      </motion.section>
+
+      {/* Problem Section */}
+      <motion.section 
+        className="py-12 px-4 sm:px-6 md:px-8 lg:px-12"
+        initial="hidden"
+        animate="visible"
+        variants={sectionVariants}
+      >
+        <div className="max-w-7xl mx-auto bg-white rounded-3xl shadow-xl p-8 sm:p-10 md:p-12">
+          <div className="grid lg:grid-cols-2 gap-8 items-center">
+            <div>
+              <div className="bg-[#007BFF]/10 p-4 rounded-xl inline-block mb-6">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-[#000000]">
+                  🚀 The Problem
+                </h2>
+              </div>
+              <p className="text-[#495057] mt-4 text-base sm:text-lg leading-relaxed">
+                Managing personal finances is overwhelming. Traditional expense trackers only record transactions but fail to provide meaningful insights.
+              </p>
+              <ul className="mt-6 space-y-3">
+                {[
+                  "🔹 Scattered financial data (bank accounts, UPI, wallets)",
+                  "🔹 Lack of intelligent financial guidance",
+                  "🔹 Inefficient money management leading to poor financial decisions"
+                ].map((item, index) => (
+                  <motion.li
+                    key={index}
+                    className="flex items-start text-[#007BFF]"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.2 }}
+                  >
+                    <span className="mr-2 mt-1">•</span>
+                    <span className="text-[#495057]">{item}</span>
+                  </motion.li>
+                ))}
+              </ul>
+            </div>
+            <motion.div 
+              className="mt-8 lg:mt-0"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
+              <img 
+                src="/images/2.png" 
+                alt="Problem Illustration" 
+                className="w-full max-w-md lg:max-w-lg rounded-xl shadow-md"
+                loading="lazy"
+              />
+            </motion.div>
+          </div>
+        </div>
+      </motion.section>
+
+      {/* Solution Section */}
+      <motion.section 
+        className="py-12 px-4 sm:px-6 md:px-8 lg:px-12"
+        initial="hidden"
+        animate="visible"
+        variants={sectionVariants}
+      >
+        <div className="max-w-7xl mx-auto bg-white rounded-3xl shadow-xl p-8 sm:p-10 md:p-12">
+          <div className="grid lg:grid-cols-2 gap-8 items-center">
+            <motion.div 
+              className="order-last lg:order-first"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
+              <img 
+                src="/images/application.png" 
+                alt="Solution Illustration" 
+                className="w-full max-w-md lg:max-w-lg rounded-xl shadow-md"
+                loading="lazy"
+              />
+            </motion.div>
+            <div>
+              <div className="bg-[#28A745]/10 p-4 rounded-xl inline-block mb-6">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-[#000000]">
+                  💡 The Solution - Inflow
+                </h2>
+              </div>
+              <p className="text-[#495057] mt-4 text-base sm:text-lg leading-relaxed">
+                Inflow is an AI-powered smart finance assistant that not only tracks expenses but analyzes spending habits and provides actionable insights.
+              </p>
+              <ul className="mt-6 space-y-3">
+                {[
+                  "✅ Seamless Bank Integration - Auto-fetches bank transactions",
+                  "✅ AI-Driven Expense Categorization - No manual tagging needed",
+                  "✅ Personalized Financial Insights - Smart budgeting & investments"
+                ].map((item, index) => (
+                  <motion.li
+                    key={index}
+                    className="flex items-start text-[#28A745]"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.2 }}
+                  >
+                    <span className="mr-2 mt-1">•</span>
+                    <span className="text-[#495057]">{item}</span>
+                  </motion.li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </motion.section>
+
+      {/* CTA Section */}
+      <motion.section 
+        className="py-12 px-4 sm:px-6 md:px-8 lg:px-12"
+        initial="hidden"
+        animate="visible"
+        variants={sectionVariants}
+      >
+        <div className="max-w-7xl mx-auto text-center">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-[#000000] mb-6">
+            🚀 Join Us in Transforming Finance!
+          </h2>
+          <p className="text-[#495057] text-lg sm:text-xl max-w-2xl mx-auto mb-8">
+            Interested in investing or partnering? Let's talk!
+          </p>
+          <Link
+            to="/contact"
+            className="inline-block bg-[#007BFF] hover:bg-[#0056B3] text-white py-3 px-8 sm:py-4 sm:px-10 rounded-xl text-lg sm:text-xl font-medium transition-all duration-300"
+          >
+            Contact Us
+          </Link>
+        </div>
+      </motion.section>
+    </div>
+  );
 };
 
 export default AboutUs;
