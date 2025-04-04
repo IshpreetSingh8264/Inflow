@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FiHome, FiRepeat, FiTarget, FiMenu, FiX, FiLogOut } from 'react-icons/fi';
+import { FiHome, FiRepeat, FiTarget, FiMenu, FiX, FiLogOut, FiInfo, FiMail } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 
 
@@ -90,8 +90,8 @@ const Navbar = () => {
               <NavLink to="/" icon={<FiHome className="mr-1" />} text="Home" />
               <NavLink to="/transactions" icon={<FiRepeat className="mr-1" />} text="Transactions" />
               <NavLink to="/goals" icon={<FiTarget className="mr-1" />} text="Goals" />
-              <NavLink to="/about" text="About Us" />
-              <NavLink to="/contact" text="Contact Us" />
+              <NavLink to="/about" icon={<FiInfo className="mr-1" />} text="About Us" />
+              <NavLink to="/contact" icon={<FiMail className="mr-1" />} text="Contact Us" />
             </div>
           )}
 
@@ -157,8 +157,8 @@ const Navbar = () => {
                     <MobileNavLink to="/" icon={<FiHome className="mr-2" />} text="Home" onClick={() => setMobileMenuOpen(false)} />
                     <MobileNavLink to="/transactions" icon={<FiRepeat className="mr-2" />} text="Transactions" onClick={() => setMobileMenuOpen(false)} />
                     <MobileNavLink to="/goals" icon={<FiTarget className="mr-2" />} text="Goals" onClick={() => setMobileMenuOpen(false)} />
-                    <MobileNavLink to="/about" text="About Us" onClick={() => setMobileMenuOpen(false)} />
-                    <MobileNavLink to="/contact" text="Contact Us" onClick={() => setMobileMenuOpen(false)} />
+                    <MobileNavLink to="/about" icon={<FiInfo className="mr-2" />} text="About Us" onClick={() => setMobileMenuOpen(false)} />
+                    <MobileNavLink to="/contact" icon={<FiMail className="mr-2" />} text="Contact Us" onClick={() => setMobileMenuOpen(false)} />
                     
                     <div className="pt-3 border-t border-[#DEE2E6]">
                       <motion.button 
