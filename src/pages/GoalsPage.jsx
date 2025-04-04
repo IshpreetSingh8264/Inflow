@@ -1,38 +1,46 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiEdit, FiTrash, FiPlus, FiX } from "react-icons/fi";
+import { FiEdit, FiTrash, FiPlus, FiCheck, FiX } from "react-icons/fi";
 
 import Navbar from "../components/Navbar";
 
-const TransactionsPage = () => {
-  const [transactions, setTransactions] = useState([]);
-  const [currentTransaction, setCurrentTransaction] = useState(null);
+const GoalsPage = () => {
+  const [goals, setGoals] = useState([]);
+  const [currentGoal, setCurrentGoal] = useState(null);
 
   useEffect(() => {
-    const storedTransactions = JSON.parse(localStorage.getItem("transactions")) || [];
-    setTransactions(storedTransactions);
+    const storedGoals = JSON.parse(localStorage.getItem("goals")) || [];
+    setGoals(storedGoals);
   }, []);
 
-  const saveToLocalStorage = (updatedTransactions) => {
-    localStorage.setItem("transactions", JSON.stringify(updatedTransactions));
+  const saveToLocalStorage = (updatedGoals) => {
+    localStorage.setItem("goals", JSON.stringify(updatedGoals));
   };
 
-  const handleAddOrEdit = (transaction) => {
-    let updatedTransactions;
-    if (transaction.id) {
-      updatedTransactions = transactions.map((t) => (t.id === transaction.id ? transaction : t));
+  const handleAddOrEdit = (goal) => {
+    let updatedGoals;
+    if (goal.id) {
+      updatedGoals = goals.map((g) => (g.id === goal.id ? goal : g));
     } else {
-      updatedTransactions = [...transactions, { ...transaction, id: Date.now() }];
+      updatedGoals = [...goals, { ...goal, id: Date.now(), completed: false }];
     }
-    setTransactions(updatedTransactions);
-    saveToLocalStorage(updatedTransactions);
-    setCurrentTransaction(null);
+    setGoals(updatedGoals);
+    saveToLocalStorage(updatedGoals);
+    setCurrentGoal(null);
   };
 
   const handleDelete = (id) => {
-    const updatedTransactions = transactions.filter((t) => t.id !== id);
-    setTransactions(updatedTransactions);
-    saveToLocalStorage(updatedTransactions);
+    const updatedGoals = goals.filter((g) => g.id !== id);
+    setGoals(updatedGoals);
+    saveToLocalStorage(updatedGoals);
+  };
+
+  const toggleCompletion = (id) => {
+    const updatedGoals = goals.map((goal) => 
+      goal.id === id ? { ...goal, completed: !goal.completed } : goal
+    );
+    setGoals(updatedGoals);
+    saveToLocalStorage(updatedGoals);
   };
 
   return (
@@ -48,14 +56,21 @@ const TransactionsPage = () => {
           transition={{ duration: 0.5 }}
         >
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl md:text-3xl font-bold text-[#000000]">Transactions</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-[#000000]">Goals</h1>
             <motion.button
               className="hidden sm:flex items-center px-4 py-2 bg-[#007BFF] text-white rounded-full shadow-md hover:bg-[#0056B3] transition-colors"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => setCurrentTransaction({ date: "", description: "", type: "income", amount: "" })}
+              onClick={() => setCurrentGoal({ 
+                title: "", 
+                description: "", 
+                amount: "", 
+                deadline: "30",
+                createdAt: new Date().toISOString().split('T')[0],
+                completed: false 
+              })}
             >
-              <FiPlus className="mr-1" /> Add Transaction
+              <FiPlus className="mr-1" /> Add Goal
             </motion.button>
           </div>
           
@@ -64,40 +79,52 @@ const TransactionsPage = () => {
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="border-b border-[#DEE2E6] text-left bg-[#F1F3F5]">
-                    <th className="p-3 text-[#495057] font-semibold">Date</th>
-                    <th className="p-3 text-[#495057] font-semibold">Description</th>
-                    <th className="p-3 text-[#495057] font-semibold">Type</th>
-                    <th className="p-3 text-[#495057] font-semibold">Amount</th>
+                    <th className="p-3 text-[#495057] font-semibold">Status</th>
+                    <th className="p-3 text-[#495057] font-semibold">Title</th>
+                    <th className="p-3 text-[#495057] font-semibold">Target Amount</th>
+                    <th className="p-3 text-[#495057] font-semibold">Deadline</th>
                     <th className="p-3 text-[#495057] text-right font-semibold">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {transactions.length > 0 ? (
-                    transactions.map((transaction) => (
+                  {goals.length > 0 ? (
+                    goals.map((goal) => (
                       <tr 
-                        key={transaction.id} 
-                        className="border-b border-[#DEE2E6] hover:bg-[#F8F9FA] transition-colors"
+                        key={goal.id} 
+                        className={`border-b border-[#DEE2E6] hover:bg-[#F8F9FA] transition-colors ${
+                          goal.completed ? "bg-[#F0FFF4]" : ""
+                        }`}
                       >
-                        <td className="p-3">{transaction.date}</td>
-                        <td className="p-3">{transaction.description}</td>
-                        <td
-                          className={`p-3 font-medium ${
-                            transaction.type === "income"
-                              ? "text-[#28A745]"
-                              : transaction.type === "expense"
-                                ? "text-[#DC3545]"
-                                : "text-[#FFC107]"
-                          }`}
-                        >
-                          {transaction.type}
+                        <td className="p-3">
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            className={`p-2 rounded-full ${
+                              goal.completed 
+                                ? "bg-[#28A745] text-white" 
+                                : "bg-[#E9ECEF] text-[#6C757D]"
+                            }`}
+                            onClick={() => toggleCompletion(goal.id)}
+                          >
+                            <FiCheck size={16} />
+                          </motion.button>
                         </td>
-                        <td className="p-3">${transaction.amount}</td>
+                        <td className="p-3 font-medium">{goal.title}</td>
+                        <td className="p-3">${goal.amount}</td>
+                        <td className="p-3">
+                          {goal.deadline} days
+                          {goal.createdAt && (
+                            <div className="text-xs text-[#6C757D]">
+                              from {new Date(goal.createdAt).toLocaleDateString()}
+                            </div>
+                          )}
+                        </td>
                         <td className="p-3 text-right">
                           <motion.button
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
                             className="text-[#007BFF] p-2"
-                            onClick={() => setCurrentTransaction(transaction)}
+                            onClick={() => setCurrentGoal(goal)}
                           >
                             <FiEdit />
                           </motion.button>
@@ -105,7 +132,7 @@ const TransactionsPage = () => {
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
                             className="text-[#DC3545] p-2"
-                            onClick={() => handleDelete(transaction.id)}
+                            onClick={() => handleDelete(goal.id)}
                           >
                             <FiTrash />
                           </motion.button>
@@ -115,7 +142,7 @@ const TransactionsPage = () => {
                   ) : (
                     <tr>
                       <td colSpan="5" className="p-4 text-center text-[#6C757D]">
-                        No transactions found. Add one to get started!
+                        No goals found. Add one to get started!
                       </td>
                     </tr>
                   )}
@@ -131,18 +158,25 @@ const TransactionsPage = () => {
         className="fixed bottom-6 right-6 p-4 bg-[#007BFF] text-white rounded-full shadow-lg hover:bg-[#0056B3] sm:hidden"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
-        onClick={() => setCurrentTransaction({ date: "", description: "", type: "income", amount: "" })}
+        onClick={() => setCurrentGoal({ 
+          title: "", 
+          description: "", 
+          amount: "", 
+          deadline: "30",
+          createdAt: new Date().toISOString().split('T')[0],
+          completed: false 
+        })}
       >
         <FiPlus size={24} />
       </motion.button>
 
       {/* Modal with AnimatePresence for smooth enter/exit */}
       <AnimatePresence>
-        {currentTransaction && (
-          <TransactionModal
-            transaction={currentTransaction}
+        {currentGoal && (
+          <GoalModal
+            goal={currentGoal}
             onSave={handleAddOrEdit}
-            onClose={() => setCurrentTransaction(null)}
+            onClose={() => setCurrentGoal(null)}
           />
         )}
       </AnimatePresence>
@@ -150,14 +184,21 @@ const TransactionsPage = () => {
   );
 };
 
-const TransactionModal = ({ transaction, onSave, onClose }) => {
-  const [form, setForm] = useState(transaction);
+const GoalModal = ({ goal, onSave, onClose }) => {
+  const [form, setForm] = useState({
+    ...goal,
+    createdAt: goal.createdAt || new Date().toISOString().split('T')[0]
+  });
   
   // Create a ref for the modal content
   const modalRef = useRef(null);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value, type, checked } = e.target;
+    setForm({ 
+      ...form, 
+      [name]: type === 'checkbox' ? checked : value 
+    });
   };
   
   // Handle click outside to close modal
@@ -176,7 +217,7 @@ const TransactionModal = ({ transaction, onSave, onClose }) => {
       onClick={handleBackdropClick}
     >
       {/* Backdrop with blur effect */}
-      <div className="absolute inset-0 bg-opacity-50 backdrop-blur-sm" />
+      <div className="absolute inset-0  backdrop-blur-sm" />
       
       {/* Modal content */}
       <motion.div
@@ -190,7 +231,7 @@ const TransactionModal = ({ transaction, onSave, onClose }) => {
         {/* Header with close button */}
         <div className="flex justify-between items-center p-5 border-b border-gray-100">
           <h2 className="text-xl font-semibold text-[#212529]">
-            {transaction.id ? "Edit" : "Add"} Transaction
+            {goal.id ? "Edit" : "Add"} Goal
           </h2>
           <motion.button
             whileHover={{ scale: 1.1 }}
@@ -205,11 +246,12 @@ const TransactionModal = ({ transaction, onSave, onClose }) => {
         {/* Form content */}
         <div className="p-5 space-y-4">
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-[#495057]">Date</label>
+            <label className="block text-sm font-medium text-[#495057]">Title</label>
             <input
-              type="date"
-              name="date"
-              value={form.date}
+              type="text"
+              name="title"
+              placeholder="Goal title"
+              value={form.title}
               onChange={handleChange}
               className="w-full p-3 border border-[#DEE2E6] rounded-lg bg-[#F8F9FA] focus:outline-none focus:ring-2 focus:ring-[#007BFF] focus:border-transparent transition-all"
             />
@@ -217,32 +259,18 @@ const TransactionModal = ({ transaction, onSave, onClose }) => {
           
           <div className="space-y-2">
             <label className="block text-sm font-medium text-[#495057]">Description</label>
-            <input
-              type="text"
+            <textarea
               name="description"
-              placeholder="Description"
+              placeholder="Detailed description"
               value={form.description}
               onChange={handleChange}
+              rows="3"
               className="w-full p-3 border border-[#DEE2E6] rounded-lg bg-[#F8F9FA] focus:outline-none focus:ring-2 focus:ring-[#007BFF] focus:border-transparent transition-all"
             />
           </div>
           
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-[#495057]">Type</label>
-            <select
-              name="type"
-              value={form.type}
-              onChange={handleChange}
-              className="w-full p-3 border border-[#DEE2E6] rounded-lg bg-[#F8F9FA] focus:outline-none focus:ring-2 focus:ring-[#007BFF] focus:border-transparent transition-all"
-            >
-              <option value="income">Income</option>
-              <option value="expense">Expense</option>
-              <option value="upcoming expense">Upcoming Expense</option>
-            </select>
-          </div>
-          
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-[#495057]">Amount</label>
+            <label className="block text-sm font-medium text-[#495057]">Target Amount ($)</label>
             <input
               type="number"
               name="amount"
@@ -251,6 +279,44 @@ const TransactionModal = ({ transaction, onSave, onClose }) => {
               onChange={(e) => setForm({ ...form, amount: Number(e.target.value) || "" })}
               className="w-full p-3 border border-[#DEE2E6] rounded-lg bg-[#F8F9FA] focus:outline-none focus:ring-2 focus:ring-[#007BFF] focus:border-transparent transition-all"
             />
+          </div>
+          
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-[#495057]">Deadline (days)</label>
+            <input
+              type="number"
+              name="deadline"
+              placeholder="Days to complete"
+              value={form.deadline}
+              onChange={handleChange}
+              min="1"
+              className="w-full p-3 border border-[#DEE2E6] rounded-lg bg-[#F8F9FA] focus:outline-none focus:ring-2 focus:ring-[#007BFF] focus:border-transparent transition-all"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-[#495057]">Start Date</label>
+            <input
+              type="date"
+              name="createdAt"
+              value={form.createdAt}
+              onChange={handleChange}
+              className="w-full p-3 border border-[#DEE2E6] rounded-lg bg-[#F8F9FA] focus:outline-none focus:ring-2 focus:ring-[#007BFF] focus:border-transparent transition-all"
+            />
+          </div>
+          
+          <div className="flex items-center space-x-2 mt-2">
+            <input
+              type="checkbox"
+              id="completed"
+              name="completed"
+              checked={form.completed}
+              onChange={handleChange}
+              className="h-4 w-4 text-[#007BFF] focus:ring-[#007BFF] border-[#DEE2E6] rounded"
+            />
+            <label htmlFor="completed" className="text-sm font-medium text-[#495057]">
+              Mark as completed
+            </label>
           </div>
         </div>
         
@@ -267,19 +333,20 @@ const TransactionModal = ({ transaction, onSave, onClose }) => {
           <motion.button
             className="px-4 py-2 bg-[#007BFF] text-white rounded-lg hover:bg-[#0069D9] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={() => {
-              onSave(form);
-              onClose();
-            }}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            disabled={!form.date || !form.description || !form.amount}
-          >
-            Save
-          </motion.button>
-        </div>
+                onSave(form);
+                onClose();
+              }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              disabled={!form.title || !form.amount || !form.deadline}
+            >
+              Save
+            </motion.button>
+          </div>
+        </motion.div>
       </motion.div>
-    </motion.div>
-  );
-};
-
-export default TransactionsPage;
+    );
+  };
+  
+  export default GoalsPage;
+  

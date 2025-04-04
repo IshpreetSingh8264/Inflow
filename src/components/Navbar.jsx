@@ -6,8 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar = () => {
   // User authentication state (temporary variable)
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-// const { isLoggedIn, login, logout } = useAuth();
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(null); // "signin" or "signup"
@@ -77,7 +76,7 @@ const Navbar = () => {
           {/* Logo */}
           <motion.div 
             className="flex items-center"
-            whileHover={{ scale: 1.05 }}
+            // whileHover={{ scale: 1.05 }}
             transition={{ type: "spring", stiffness: 400, damping: 10 }}
           >
             <Link to="/" className="flex items-center">
