@@ -55,9 +55,9 @@ const Navbar = () => {
   return (
     <>
       <motion.div 
-        // initial={{ y: -20, opacity: 0 }}
-        // animate={{ y: 0, opacity: 1 }}
-        // transition={{ duration: 0.5, ease: "easeOut" }}
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
         className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4 py-3"
       >
         <motion.div 
@@ -90,6 +90,8 @@ const Navbar = () => {
               <NavLink to="/" icon={<FiHome className="mr-1" />} text="Home" />
               <NavLink to="/transactions" icon={<FiRepeat className="mr-1" />} text="Transactions" />
               <NavLink to="/goals" icon={<FiTarget className="mr-1" />} text="Goals" />
+              <NavLink to="/about" text="About Us" />
+              <NavLink to="/contact" text="Contact Us" />
             </div>
           )}
 
@@ -155,6 +157,8 @@ const Navbar = () => {
                     <MobileNavLink to="/" icon={<FiHome className="mr-2" />} text="Home" onClick={() => setMobileMenuOpen(false)} />
                     <MobileNavLink to="/transactions" icon={<FiRepeat className="mr-2" />} text="Transactions" onClick={() => setMobileMenuOpen(false)} />
                     <MobileNavLink to="/goals" icon={<FiTarget className="mr-2" />} text="Goals" onClick={() => setMobileMenuOpen(false)} />
+                    <MobileNavLink to="/about" text="About Us" onClick={() => setMobileMenuOpen(false)} />
+                    <MobileNavLink to="/contact" text="Contact Us" onClick={() => setMobileMenuOpen(false)} />
                     
                     <div className="pt-3 border-t border-[#DEE2E6]">
                       <motion.button 

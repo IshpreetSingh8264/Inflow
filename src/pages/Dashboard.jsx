@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { FiSearch, FiUpload, FiFileText, FiArrowRight } from 'react-icons/fi';
+import { FiSearch, FiUpload, FiFileText, FiArrowRight, FiTrendingUp, FiTrendingDown } from 'react-icons/fi';
 import Navbar from '../components/Navbar';
 
 const Dashboard = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(true); // Already set to true
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [file, setFile] = useState(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const searchContainerRef = useRef(null);
 
   // Check if user is logged in
   useEffect(() => {
     // This would typically check a token in localStorage or context
     const checkLoginStatus = () => {
       const token = localStorage.getItem('token');
-      // Only update if token exists, otherwise keep the default true value
       if (token !== null) {
         setIsLoggedIn(!!token);
       }
@@ -25,12 +25,13 @@ const Dashboard = () => {
 
   // Handle mouse movement for gradient effect
   const handleMouseMove = (e) => {
-    const { currentTarget: target } = e;
-    const rect = target.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    setMousePosition({ x, y });
-  };  
+    if (searchContainerRef.current) {
+      const rect = searchContainerRef.current.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      setMousePosition({ x, y });
+    }
+  };
 
   // Handle file upload
   const handleFileChange = (e) => {
@@ -54,6 +55,50 @@ const Dashboard = () => {
       alert('Please upload a CSV file first');
     }
   };
+
+  // Stock ticker data (static)
+  const stockTickers = [
+    {
+      id: 1,
+      symbol: 'AAPL',
+      name: 'Apple Inc.',
+      price: 178.72,
+      change: 2.34,
+      changePercent: 1.32,
+      chartData: [150, 152, 148, 155, 160, 158, 165, 170, 168, 175, 178],
+      trending: 'up'
+    },
+    {
+      id: 2,
+      symbol: 'MSFT',
+      name: 'Microsoft Corp.',
+      price: 338.11,
+      change: -1.25,
+      changePercent: -0.37,
+      chartData: [320, 325, 330, 328, 335, 340, 338, 342, 339, 336, 338],
+      trending: 'down'
+    },
+    {
+      id: 3,
+      symbol: 'GOOGL',
+      name: 'Alphabet Inc.',
+      price: 131.86,
+      change: 0.94,
+      changePercent: 0.72,
+      chartData: [125, 127, 129, 128, 130, 132, 131, 133, 132, 130, 131],
+      trending: 'up'
+    },
+    {
+      id: 4,
+      symbol: 'AMZN',
+      name: 'Amazon.com Inc.',
+      price: 127.74,
+      change: 1.56,
+      changePercent: 1.24,
+      chartData: [120, 122, 121, 123, 125, 124, 126, 128, 127, 126, 127],
+      trending: 'up'
+    }
+  ];
 
   // News data (static)
   const newsItems = [
@@ -112,11 +157,33 @@ const Dashboard = () => {
     }
   };
 
+  // Mini chart component for stock tickers
+  const MiniChart = ({ data, trending }) => {
+    const maxValue = Math.max(...data);
+    const minValue = Math.min(...data);
+    const range = maxValue - minValue;
+
+    return (
+      <div className="h-12 w-24 flex items-end">
+        {data.map((value, index) => {
+          const height = range === 0 ? 50 : ((value - minValue) / range) * 100;
+          return (
+            <div
+              key={index}
+              className={`w-1 mx-[1px] rounded-t-sm ${trending === 'up' ? 'bg-green-500' : 'bg-red-500'}`}
+              style={{ height: `${height}%` }}
+            ></div>
+          );
+        })}
+      </div>
+    );
+  };
+
   // For debugging
   console.log("isLoggedIn status:", isLoggedIn);
 
   return (
-    <div className="min-h-screen bg-[#F0F2F5]"> {/* Changed background to slightly darker */}
+    <div className="min-h-screen bg-[#F0F2F5]">
       <Navbar />
       {isLoggedIn ? (
         <div className="pt-24 px-4 md:px-6 lg:px-8 pb-20">
@@ -126,16 +193,18 @@ const Dashboard = () => {
             animate="visible"
             variants={staggerVariants}
           >
-            {/* Search Container */}
+            {/* Search Container with Dynamic Gradient */}
             <motion.div
               className="relative overflow-hidden rounded-2xl shadow-lg"
               variants={containerVariants}
               onMouseMove={handleMouseMove}
+              ref={searchContainerRef}
               style={{
-                background: `radial-gradient(circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(0, 123, 255, 0.1), transparent 50%)`
+                background: `radial-gradient(circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(0, 123, 255, 0.2), transparent 60%)`,
+                backgroundColor: '#ffffff'
               }}
             >
-              <div className="bg-gradient-to-r from-[#E9ECEF] via-[#DEE2E6] to-[#E9ECEF] p-8 md:p-12"> {/* Darkened gradient */}
+              <div className="p-8 md:p-12">
                 <h2 className="text-2xl font-bold text-center mb-6 text-[#212529]">
                   Search Financial Data
                 </h2>
@@ -161,7 +230,7 @@ const Dashboard = () => {
 
             {/* File Upload Container */}
             <motion.div
-              className="bg-white rounded-xl shadow-md overflow-hidden border border-[#E0E0E0]" /* Added border for better visibility */
+              className="bg-white rounded-xl shadow-md overflow-hidden border border-[#E0E0E0]"
               variants={containerVariants}
             >
               <div className="p-6 md:p-8">
@@ -204,9 +273,52 @@ const Dashboard = () => {
               </div>
             </motion.div>
 
+            {/* Stock Tickers Container - NEW SECTION */}
+            <motion.div
+              className="bg-white rounded-xl shadow-md overflow-hidden border border-[#E0E0E0]"
+              variants={containerVariants}
+            >
+              <div className="p-6 md:p-8">
+                <h2 className="text-xl font-semibold mb-4 text-[#212529]">
+                  Market Tickers
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {stockTickers.map((stock) => (
+                    <motion.div
+                      key={stock.id}
+                      className="p-4 border border-[#DEE2E6] rounded-lg hover:shadow-md transition-shadow"
+                      variants={itemVariants}
+                      whileHover={{ y: -5 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <h3 className="font-bold text-lg text-[#212529]">{stock.symbol}</h3>
+                          <p className="text-sm text-[#6C757D]">{stock.name}</p>
+                        </div>
+                        <div className={`flex items-center ${stock.trending === 'up' ? 'text-green-500' : 'text-red-500'}`}>
+                          {stock.trending === 'up' ? <FiTrendingUp size={18} /> : <FiTrendingDown size={18} />}
+                        </div>
+                      </div>
+
+                      <div className="flex justify-between items-end mt-3">
+                        <div>
+                          <p className="text-xl font-semibold text-[#212529]">${stock.price.toFixed(2)}</p>
+                          <p className={`text-sm ${stock.change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                            {stock.change >= 0 ? '+' : ''}{stock.change.toFixed(2)} ({stock.change >= 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%)
+                          </p>
+                        </div>
+                        <MiniChart data={stock.chartData} trending={stock.trending} />
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+
             {/* News Container */}
             <motion.div
-              className="bg-white rounded-xl shadow-md overflow-hidden border border-[#E0E0E0]" /* Added border for better visibility */
+              className="bg-white rounded-xl shadow-md overflow-hidden border border-[#E0E0E0]"
               variants={containerVariants}
             >
               <div className="p-6 md:p-8">
@@ -222,7 +334,7 @@ const Dashboard = () => {
                   {newsItems.map((item) => (
                     <motion.div
                       key={item.id}
-                      className="p-4 border border-[#DEE2E6] rounded-lg hover:shadow-md transition-shadow bg-[#FAFAFA]" /* Added slight background color */
+                      className="p-4 border border-[#DEE2E6] rounded-lg hover:shadow-md transition-shadow bg-[#FAFAFA]"
                       variants={itemVariants}
                       whileHover={{ x: 5 }}
                       transition={{ duration: 0.2 }}
@@ -243,7 +355,7 @@ const Dashboard = () => {
       ) : (
         <div className="pt-24 px-4 md:px-6 lg:px-8 pb-20 flex justify-center items-center">
           <motion.div
-            className="text-center max-w-lg bg-white p-8 rounded-xl shadow-md" /* Added background and padding */
+            className="text-center max-w-lg bg-white p-8 rounded-xl shadow-md"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -271,3 +383,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
