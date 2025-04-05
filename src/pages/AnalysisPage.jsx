@@ -5,7 +5,8 @@ import ErrorBoundary from "../components/ErrorBoundary"; // Import ErrorBoundary
 import axios from "axios"; // Import axios for API calls
 import {
   PieChart, Pie, Cell, ResponsiveContainer,
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+  BarChart, Bar
 } from 'recharts';
 
 const AnalysisPage = () => {
@@ -136,7 +137,7 @@ const AnalysisPage = () => {
     return { typeData, monthlyData, totalAmount };
   }, [transactions]);
 
-  const COLORS = ['#28A745', '#DC3545'];
+  const COLORS = ['#28A745', '#DC3545', '#FFC107', '#17A2B8', '#6F42C1', '#FD7E14']; // Extended color palette
 
   // Pagination logic
   const paginatedTransactions = useMemo(() => {
@@ -148,8 +149,11 @@ const AnalysisPage = () => {
 
   const [categories, setCategories] = useState([]); // State for categorized data
   const [summary, setSummary] = useState(null); // State for summary data
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true); // Loading state for categories
+  const [isLoadingSummary, setIsLoadingSummary] = useState(false); // Loading state for summary
 
   const fetchCategorizedData = useCallback(async () => {
+    setIsLoadingCategories(true);
     try {
       const token = localStorage.getItem("token");
       const { data } = await axios.get(`${import.meta.env.VITE_BASE_URL}/llm/categorise`, {
@@ -157,15 +161,18 @@ const AnalysisPage = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      setCategories(data.data.categories);
-      console.log("Fetched categorized data:", data.data.categories);
-      
+      setTimeout(() => { // Simulate loading for 1 second
+        setCategories(data.data.categories);
+        setIsLoadingCategories(false);
+      }, 1000);
     } catch (error) {
       console.error("Error fetching categorized data:", error);
+      setIsLoadingCategories(false);
     }
   }, []);
 
-  const fetchSummaryData = useCallback(async () => {
+  const handleGenerateSummary = async () => {
+    setIsLoadingSummary(true);
     try {
       const token = localStorage.getItem("token");
       const { data } = await axios.get(`${import.meta.env.VITE_BASE_URL}/llm/summarise`, {
@@ -176,13 +183,14 @@ const AnalysisPage = () => {
       setSummary(data.data);
     } catch (error) {
       console.error("Error fetching summary data:", error);
+    } finally {
+      setIsLoadingSummary(false);
     }
-  }, []);
+  };
 
   useEffect(() => {
     fetchCategorizedData();
-    // fetchSummaryData();
-  }, [fetchCategorizedData, fetchSummaryData]);
+  }, [fetchCategorizedData]);
 
   return (
     <ErrorBoundary>
@@ -198,28 +206,6 @@ const AnalysisPage = () => {
           >
             <h1 className="text-2xl md:text-3xl font-bold text-[#000000] mb-6">Financial Analysis</h1>
             
-            {/* Summary Section */}
-            {summary && (
-              <div className="mb-8 p-4 bg-[#FFFFFF] shadow-md rounded-lg">
-                <h2 className="text-xl font-semibold text-[#212529] mb-4">Summary</h2>
-                <p className="text-[#495057] mb-2">{summary.summary}</p>
-                <ul className="list-disc pl-5 text-[#495057] mb-4">
-                  {summary.insights.map((insight, index) => (
-                    <li key={index}>{insight}</li>
-                  ))}
-                </ul>
-                <h3 className="text-lg font-semibold text-[#212529] mb-2">Recommendations</h3>
-                <ul className="list-disc pl-5 text-[#495057]">
-                  {summary.recommendations.map((recommendation, index) => (
-                    <li key={index}>{recommendation}</li>
-                  ))}
-                </ul>
-                <p className="mt-4 text-[#495057]">
-                  <strong>Financial Health:</strong> {summary.financialHealth}
-                </p>
-              </div>
-            )}
-
             <div className="flex flex-col lg:flex-row gap-6 mb-8">
               <motion.div 
                 className="lg:w-1/2 bg-[#FFFFFF] shadow-md rounded-lg p-4"
@@ -416,29 +402,111 @@ const AnalysisPage = () => {
                     <p className="text-center text-[#6C757D] py-4">No financial data available to display.</p>
                   )}
                 </div>
-                <div className="mt-8">
-                  <h2 className="text-xl font-semibold text-[#212529] mb-4">Categorized Transactions</h2>
-                  {categories.length > 0 ? (
+              </motion.div>
+            </div>
+
+            {/* Summary Section */}
+            <div className="mb-8 p-4 bg-[#FFFFFF] shadow-md rounded-lg">
+              <h2 className="text-xl font-semibold text-[#212529] mb-4">Summary</h2>
+              <button
+                onClick={handleGenerateSummary}
+                className="px-4 py-2 bg-[#007BFF] text-white rounded hover:bg-[#0056b3] transition-colors mb-4"
+                disabled={isLoadingSummary}
+              >
+                {isLoadingSummary ? "Generating..." : "Generate Summary"}
+              </button>
+              {summary && (
+                <div>
+                  <p className="text-[#495057] mb-2">{summary.summary}</p>
+                  <ul className="list-disc pl-5 text-[#495057] mb-4">
+                    {summary.insights.map((insight, index) => (
+                      <li key={index}>{insight}</li>
+                    ))}
+                  </ul>
+                  <h3 className="text-lg font-semibold text-[#212529] mb-2">Recommendations</h3>
+                  <ul className="list-disc pl-5 text-[#495057]">
+                    {summary.recommendations.map((recommendation, index) => (
+                      <li key={index}>{recommendation}</li>
+                    ))}
+                  </ul>
+                  <p className="mt-4 text-[#495057]">
+                    <strong>Financial Health:</strong> {summary.financialHealth}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Categorized Transactions Section */}
+            <div className="mb-8 p-4 bg-[#FFFFFF] shadow-md rounded-lg">
+              <h2 className="text-xl font-semibold text-[#212529] mb-4">Categorized Transactions</h2>
+              {isLoadingCategories ? (
+                <div className="flex justify-center items-center h-64">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-[#007BFF]"></div>
+                </div>
+              ) : categories.length > 0 ? (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Pie Chart */}
+                  <div className="bg-[#F8F9FA] p-4 rounded-lg shadow">
+                    <h3 className="text-lg font-semibold text-[#212529] mb-4">Category Distribution</h3>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie
+                          data={categories.filter(category => category.amount > 0)} // Exclude items with 0 value
+                          dataKey="amount"
+                          nameKey="name"
+                          cx="50%"
+                          cy="50%"
+                          outerRadius={80}
+                          fill="#8884d8"
+                          label={({ name, value }) => `${name}: $${value}`}
+                        >
+                          {categories
+                            .filter(category => category.amount > 0)
+                            .map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  {/* Bar Chart */}
+                  <div className="bg-[#F8F9FA] p-4 rounded-lg shadow">
+                    <h3 className="text-lg font-semibold text-[#212529] mb-4">Category Comparison</h3>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart
+                        data={categories.filter(category => category.amount > 0)} // Exclude items with 0 value
+                        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#DEE2E6" />
+                        <XAxis dataKey="name" stroke="#495057" />
+                        <YAxis stroke="#495057" />
+                        <Tooltip />
+                        <Bar dataKey="amount" fill="#007BFF" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  {/* List of Categories */}
+                  <div className="col-span-1 lg:col-span-2 bg-[#F8F9FA] p-4 rounded-lg shadow">
+                    <h3 className="text-lg font-semibold text-[#212529] mb-4">Detailed Breakdown</h3>
                     <ul className="space-y-2">
                       {categories.map((category) => {
-                        const amount = category.amount; // Ensure amount is a valid number
-                        const percentage = parseFloat(category.percentage) || 0; // Ensure percentage is a valid number
-                        const formattedName = category.name.replace(/_/g, " "); // Replace underscores with spaces
+                        const formattedName = category.name.replace(/_/g, " ");
                         return (
-                          <li key={category.name} className="flex justify-between p-2 bg-[#F8F9FA] rounded shadow">
+                          <li key={category.name} className="flex justify-between p-2 bg-[#FFFFFF] rounded shadow">
                             <span className="font-medium text-[#212529]">{formattedName}</span>
-                            <span className="text-[#495057]">
-                              {amount}
-                            </span>
+                            <span className="text-[#495057]">${category.amount}</span>
                           </li>
                         );
                       })}
                     </ul>
-                  ) : (
-                    <p className="text-[#6C757D]">No categorized data available.</p>
-                  )}
+                  </div>
                 </div>
-              </motion.div>
+              ) : (
+                <p className="text-center text-[#6C757D] py-4">No categorized data available.</p>
+              )}
             </div>
           </motion.div>
         </div>

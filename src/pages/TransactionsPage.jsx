@@ -239,7 +239,7 @@ const TransactionModal = ({ transaction, onSave, onClose }) => {
       {/* Modal content */}
       <motion.div
         ref={modalRef}
-        className="bg-white rounded-xl shadow-2xl w-full max-w-md relative z-10 overflow-hidden"
+        className=" rounded-xl shadow-2xl w-full max-w-md relative z-10 overflow-hidden"
         initial={{ scale: 0.9, y: 20, opacity: 0 }}
         animate={{ scale: 1, y: 0, opacity: 1 }}
         exit={{ scale: 0.9, y: 20, opacity: 0 }}
