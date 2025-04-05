@@ -2,14 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FiHome, FiRepeat, FiTarget, FiMenu, FiX, FiLogOut, FiInfo, FiMail, FiPieChart, FiMessageSquare, FiTrendingUp } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
-
+import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
-  // User authentication state (temporary variable)
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const { user, logout } = useAuth();
+  const [isLoggedIn, setIsLoggedIn] = useState(!!user);
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(null); // "signin" or "signup"
+
+  useEffect(() => {
+    setIsLoggedIn(!!user);
+  }, [user]);
 
   // Handle scroll effect for navbar
   useEffect(() => {
@@ -43,21 +47,12 @@ const Navbar = () => {
 
   // Handle logout
   const handleLogout = () => {
-    setIsLoggedIn(false);
-  };
-
-  // Handle login (for demo purposes)
-  const handleLogin = () => {
-    setModalOpen(null);
-    setIsLoggedIn(true);
+    logout();
   };
 
   return (
     <>
       <motion.div 
-        // initial={{ y: -20, opacity: 0 }}
-        // animate={{ y: 0, opacity: 1 }}
-        // transition={{ duration: 0.5, ease: "easeOut" }}
         className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4 py-3"
       >
         <motion.div 
@@ -76,7 +71,6 @@ const Navbar = () => {
           {/* Logo */}
           <motion.div 
             className="flex items-center"
-            // whileHover={{ scale: 1.05 }}
             transition={{ type: "spring", stiffness: 400, damping: 10 }}
           >
             <Link to="/" className="flex items-center">
@@ -215,7 +209,6 @@ const Navbar = () => {
           <AuthModal 
             type={modalOpen} 
             onClose={() => setModalOpen(null)} 
-            onLogin={handleLogin}
             setModalOpen={setModalOpen}
           />
         )}
@@ -225,10 +218,34 @@ const Navbar = () => {
 };
 
 // Authentication Modal Component
-const AuthModal = ({ type, onClose, onLogin, setModalOpen }) => {
+const AuthModal = ({ type, onClose, setModalOpen }) => {
+  const { login, register } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [username, setUsername] = useState('');
+  const [error, setError] = useState('');
+
+  const handleSubmit = async () => {
+    try {
+      if (type === 'signup') {
+        if (password !== confirmPassword) {
+          setError('Passwords do not match');
+          return;
+        }
+        await register(username, email, password);
+      } else {
+        await login(email, password);
+      }
+      setModalOpen(null);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   return (
     <motion.div 
-      className="fixed inset-0 flex items-center justify-center backdrop-blur-md  bg-opacity-30 z-50"
+      className="fixed inset-0 flex items-center justify-center backdrop-blur-md bg-opacity-30 z-50"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -244,12 +261,28 @@ const AuthModal = ({ type, onClose, onLogin, setModalOpen }) => {
         <button className="absolute top-3 right-3 text-gray-500" onClick={onClose}><FiX size={24} /></button>
         <h2 className="text-xl font-bold text-[#000000] mb-4">{type === 'signin' ? 'Sign In' : 'Sign Up'}</h2>
         
+        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+
         <div className="space-y-4">
+          {type === 'signup' && (
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-[#495057]">Username</label>
+              <input 
+                type="text" 
+                placeholder="Enter your username" 
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full p-2 border border-[#DEE2E6] rounded-md bg-[#F1F3F5] text-[#495057] focus:outline-none focus:ring-2 focus:ring-[#007BFF] focus:border-transparent" 
+              />
+            </div>
+          )}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-[#495057]">Email</label>
             <input 
               type="email" 
               placeholder="Enter your email" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full p-2 border border-[#DEE2E6] rounded-md bg-[#F1F3F5] text-[#495057] focus:outline-none focus:ring-2 focus:ring-[#007BFF] focus:border-transparent" 
             />
           </div>
@@ -259,6 +292,8 @@ const AuthModal = ({ type, onClose, onLogin, setModalOpen }) => {
             <input 
               type="password" 
               placeholder="Enter your password" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full p-2 border border-[#DEE2E6] rounded-md bg-[#F1F3F5] text-[#495057] focus:outline-none focus:ring-2 focus:ring-[#007BFF] focus:border-transparent" 
             />
           </div>
@@ -269,6 +304,8 @@ const AuthModal = ({ type, onClose, onLogin, setModalOpen }) => {
               <input 
                 type="password" 
                 placeholder="Confirm your password" 
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 className="w-full p-2 border border-[#DEE2E6] rounded-md bg-[#F1F3F5] text-[#495057] focus:outline-none focus:ring-2 focus:ring-[#007BFF] focus:border-transparent" 
               />
             </div>
@@ -278,26 +315,10 @@ const AuthModal = ({ type, onClose, onLogin, setModalOpen }) => {
             className="w-full py-3 bg-[#007BFF] text-white font-medium rounded-md hover:bg-[#0056B3] transition-colors"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={onLogin} // For demo purposes, both sign in and sign up will log the user in
+            onClick={handleSubmit}
           >
             {type === 'signin' ? 'Sign In' : 'Create Account'}
           </motion.button>
-          
-          {type === 'signin' ? (
-            <p className="text-sm text-center text-[#6C757D]">
-              Don't have an account? <button onClick={() => {
-                onClose();
-                setTimeout(() => setModalOpen('signup'), 100);
-              }} className="text-[#007BFF] hover:underline">Sign Up</button>
-            </p>
-          ) : (
-            <p className="text-sm text-center text-[#6C757D]">
-              Already have an account? <button onClick={() => {
-                onClose();
-                setTimeout(() => setModalOpen('signin'), 100);
-              }} className="text-[#007BFF] hover:underline">Sign In</button>
-            </p>
-          )}
         </div>
       </motion.div>
     </motion.div>

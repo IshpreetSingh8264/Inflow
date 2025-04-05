@@ -2,26 +2,19 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { FiSearch, FiUpload, FiFileText, FiArrowRight, FiTrendingUp, FiTrendingDown } from 'react-icons/fi';
 import Navbar from '../components/Navbar';
+import { useAuth } from '../context/AuthContext';
 
 const Dashboard = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const { user } = useAuth();
+  const [isLoggedIn, setIsLoggedIn] = useState(!!user);
   const [searchQuery, setSearchQuery] = useState('');
   const [file, setFile] = useState(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const searchContainerRef = useRef(null);
 
-  // Check if user is logged in
   useEffect(() => {
-    // This would typically check a token in localStorage or context
-    const checkLoginStatus = () => {
-      const token = localStorage.getItem('token');
-      if (token !== null) {
-        setIsLoggedIn(!!token);
-      }
-    };
-
-    checkLoginStatus();
-  }, []);
+    setIsLoggedIn(!!user);
+  }, [user]);
 
   // Handle mouse movement for gradient effect
   const handleMouseMove = (e) => {
@@ -180,7 +173,6 @@ const Dashboard = () => {
   };
 
   // For debugging
-  console.log("isLoggedIn status:", isLoggedIn);
 
   return (
     <div className="min-h-screen bg-[#F0F2F5]">
@@ -200,7 +192,7 @@ const Dashboard = () => {
               onMouseMove={handleMouseMove}
               ref={searchContainerRef}
               style={{
-                background: `radial-gradient(circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(0, 123, 255, 0.2), transparent 60%)`,
+                backgroundImage: `radial-gradient(circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(0, 123, 255, 0.2), transparent 60%)`,
                 backgroundColor: '#ffffff'
               }}
             >

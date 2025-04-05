@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiEdit, FiTrash, FiPlus, FiX } from "react-icons/fi";
+import axios from "axios"; // Import axios for API calls
+import { format } from "date-fns"; // Import date-fns for formatting
 
 import Navbar from "../components/Navbar";
 
@@ -8,31 +10,80 @@ const TransactionsPage = () => {
   const [transactions, setTransactions] = useState([]);
   const [currentTransaction, setCurrentTransaction] = useState(null);
 
+  const baseUrl = `${import.meta.env.VITE_BASE_URL}/transactions`;
+
   useEffect(() => {
-    const storedTransactions = JSON.parse(localStorage.getItem("transactions")) || [];
-    setTransactions(storedTransactions);
+    // Fetch transactions from the backend
+    const fetchTransactions = async () => {
+      try {
+        const token = localStorage.getItem("token"); // Retrieve token from localStorage
+        const { data } = await axios.get(baseUrl, {
+          headers: {
+            Authorization: `Bearer ${token}`, // Add Bearer token
+          },
+        });
+        setTransactions(data.data);
+        
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+      }
+    };
+    fetchTransactions();
   }, []);
 
-  const saveToLocalStorage = (updatedTransactions) => {
-    localStorage.setItem("transactions", JSON.stringify(updatedTransactions));
-  };
-
-  const handleAddOrEdit = (transaction) => {
-    let updatedTransactions;
-    if (transaction.id) {
-      updatedTransactions = transactions.map((t) => (t.id === transaction.id ? transaction : t));
-    } else {
-      updatedTransactions = [...transactions, { ...transaction, id: Date.now() }];
+  const handleAddOrEdit = async (transaction) => {
+    try {
+      const token = localStorage.getItem("token"); // Retrieve token from localStorage
+      let updatedTransactions;
+      if (transaction.id) {
+        // Update transaction
+        const { data } = await axios.put(`${baseUrl}/${transaction.id}`, {
+          title: transaction.title,
+          description: transaction.description,
+          amount: transaction.amount,
+          type: transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1), // Capitalize type
+          created_at: transaction.date, // Pass selected date as created_at
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`, // Add Bearer token
+          },
+        });
+        updatedTransactions = transactions.map((t) => (t.id === transaction.id ? data.data : t));
+      } else {
+        // Create new transaction (id is not passed)
+        const { data } = await axios.post(baseUrl, {
+          title: transaction.title,
+          description: transaction.description,
+          amount: transaction.amount,
+          type: transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1), // Capitalize type
+          created_at: transaction.date, // Pass selected date as created_at
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`, // Add Bearer token
+          },
+        });
+        updatedTransactions = [...transactions, data.data];
+      }
+      setTransactions(updatedTransactions);
+      setCurrentTransaction(null);
+    } catch (error) {
+      console.error("Error saving transaction:", error);
     }
-    setTransactions(updatedTransactions);
-    saveToLocalStorage(updatedTransactions);
-    setCurrentTransaction(null);
   };
 
-  const handleDelete = (id) => {
-    const updatedTransactions = transactions.filter((t) => t.id !== id);
-    setTransactions(updatedTransactions);
-    saveToLocalStorage(updatedTransactions);
+  const handleDelete = async (id) => {
+    try {
+      const token = localStorage.getItem("token"); // Retrieve token from localStorage
+      await axios.delete(`${baseUrl}/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Add Bearer token
+        },
+      });
+      const updatedTransactions = transactions.filter((t) => t.id !== id);
+      setTransactions(updatedTransactions);
+    } catch (error) {
+      console.error("Error deleting transaction:", error);
+    }
   };
 
   return (
@@ -53,7 +104,7 @@ const TransactionsPage = () => {
               className="hidden sm:flex items-center px-4 py-2 bg-[#007BFF] text-white rounded-full shadow-md hover:bg-[#0056B3] transition-colors"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => setCurrentTransaction({ date: "", description: "", type: "income", amount: "" })}
+              onClick={() => setCurrentTransaction({ title: "", date: "", description: "", type: "income", amount: "" })}
             >
               <FiPlus className="mr-1" /> Add Transaction
             </motion.button>
@@ -64,6 +115,7 @@ const TransactionsPage = () => {
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="border-b border-[#DEE2E6] text-left bg-[#F1F3F5]">
+                    <th className="p-3 text-[#495057] font-semibold">Title</th>
                     <th className="p-3 text-[#495057] font-semibold">Date</th>
                     <th className="p-3 text-[#495057] font-semibold">Description</th>
                     <th className="p-3 text-[#495057] font-semibold">Type</th>
@@ -78,15 +130,18 @@ const TransactionsPage = () => {
                         key={transaction.id} 
                         className="border-b border-[#DEE2E6] hover:bg-[#F8F9FA] transition-colors"
                       >
-                        <td className="p-3">{transaction.date}</td>
-                        <td className="p-3">{transaction.description}</td>
+                        <td className="p-3">{transaction.title}</td>
+                        <td className="p-3">
+                          {format(new Date(transaction.created_at), "yyyy-MM-dd HH:mm:ss")} {/* Format created_at */}
+                        </td>
+                        <td className="p-3 max-w-[200px] truncate" title={transaction.description}>
+                          {transaction.description} {/* Truncate long descriptions */}
+                        </td>
                         <td
                           className={`p-3 font-medium ${
-                            transaction.type === "income"
-                              ? "text-[#28A745]"
-                              : transaction.type === "expense"
-                                ? "text-[#DC3545]"
-                                : "text-[#FFC107]"
+                            transaction.type === "Income"
+                              ? "text-[#28A745]" // Green for income
+                              : "text-[#DC3545]" // Red for expenses
                           }`}
                         >
                           {transaction.type}
@@ -114,7 +169,7 @@ const TransactionsPage = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="5" className="p-4 text-center text-[#6C757D]">
+                      <td colSpan="6" className="p-4 text-center text-[#6C757D]">
                         No transactions found. Add one to get started!
                       </td>
                     </tr>
@@ -131,7 +186,7 @@ const TransactionsPage = () => {
         className="fixed bottom-6 right-6 p-4 bg-[#007BFF] text-white rounded-full shadow-lg hover:bg-[#0056B3] sm:hidden"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
-        onClick={() => setCurrentTransaction({ date: "", description: "", type: "income", amount: "" })}
+        onClick={() => setCurrentTransaction({ title: "", date: "", description: "", type: "income", amount: "" })}
       >
         <FiPlus size={24} />
       </motion.button>
@@ -151,7 +206,10 @@ const TransactionsPage = () => {
 };
 
 const TransactionModal = ({ transaction, onSave, onClose }) => {
-  const [form, setForm] = useState(transaction);
+  const [form, setForm] = useState({
+    ...transaction,
+    date: transaction.created_at ? new Date(transaction.created_at).toISOString().split("T")[0] : "", // Pre-fill date
+  });
   
   // Create a ref for the modal content
   const modalRef = useRef(null);
@@ -168,21 +226,15 @@ const TransactionModal = ({ transaction, onSave, onClose }) => {
   };
 
   return (
-    <motion.div 
+    <motion.div
       className="fixed inset-0 flex items-center justify-center z-50 px-4"
-      initial={{ opacity: 1 }}
+      initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={handleBackdropClick}
     >
-      {/* Backdrop with blur effect - improved to appear immediately */}
-      <motion.div 
-        className="absolute inset-0 backdrop-blur-md"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.5 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
-      />
+      {/* Backdrop with immediate blur effect */}
+      <div className="absolute inset-0 bg-transparent backdrop-blur-md" />
       
       {/* Modal content */}
       <motion.div
@@ -210,6 +262,18 @@ const TransactionModal = ({ transaction, onSave, onClose }) => {
         
         {/* Form content */}
         <div className="p-5 space-y-4">
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-[#495057]">Title</label>
+            <input
+              type="text"
+              name="title"
+              placeholder="Title"
+              value={form.title}
+              onChange={handleChange}
+              className="w-full p-3 border border-[#DEE2E6] rounded-lg bg-[#F8F9FA] focus:outline-none focus:ring-2 focus:ring-[#007BFF] focus:border-transparent transition-all"
+            />
+          </div>
+          
           <div className="space-y-2">
             <label className="block text-sm font-medium text-[#495057]">Date</label>
             <input
@@ -243,7 +307,6 @@ const TransactionModal = ({ transaction, onSave, onClose }) => {
             >
               <option value="income">Income</option>
               <option value="expense">Expense</option>
-              <option value="upcoming expense">Upcoming Expense</option>
             </select>
           </div>
           
@@ -278,7 +341,7 @@ const TransactionModal = ({ transaction, onSave, onClose }) => {
             }}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            disabled={!form.date || !form.description || !form.amount}
+            disabled={!form.title || !form.date || !form.description || !form.amount}
           >
             Save
           </motion.button>
