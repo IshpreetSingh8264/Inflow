@@ -1,16 +1,44 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { FiSearch, FiUpload, FiFileText, FiArrowRight, FiTrendingUp, FiTrendingDown } from 'react-icons/fi';
+import { FiSearch, FiArrowRight, FiTrendingUp, FiTrendingDown } from 'react-icons/fi';
 import Navbar from '../components/Navbar';
+import NewsModal from '../components/NewsModal';
 import { useAuth } from '../context/AuthContext';
+
+// Mini chart component for stock tickers
+const MiniChart = ({ data, trending }) => {
+  const maxValue = Math.max(...data);
+  const minValue = Math.min(...data);
+  const range = maxValue - minValue;
+
+  return (
+    <div className="h-12 w-24 flex items-end">
+      {data.map((value, index) => {
+        const height = range === 0 ? 50 : ((value - minValue) / range) * 100;
+        return (
+          <div
+            key={index}
+            className={`w-1 mx-[1px] rounded-t-sm ${trending === 'up' ? 'bg-green-500' : 'bg-red-500'}`}
+            style={{ height: `${height}%` }}
+          ></div>
+        );
+      })}
+    </div>
+  );
+};
 
 const Dashboard = () => {
   const { user } = useAuth();
   const [isLoggedIn, setIsLoggedIn] = useState(!!user);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [file, setFile] = useState(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [newsItems, setNewsItems] = useState([]);
+  const [selectedNews, setSelectedNews] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const newsPerPage = 10;
   const searchContainerRef = useRef(null);
+  const [stockTickers, setStockTickers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
 
   useEffect(() => {
     setIsLoggedIn(!!user);
@@ -26,153 +54,117 @@ const Dashboard = () => {
     }
   };
 
-  // Handle file upload
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (selectedFile && selectedFile.type === 'text/csv') {
-      setFile(selectedFile);
-    } else {
-      alert('Please upload a CSV file');
-      setFile(null);
-      e.target.value = null;
-    }
-  };
+  // Fetch financial news from Finnhub API
+  useEffect(() => {
+    const fetchFinancialNews = async () => {
+      const apiKey = 'cvo9pdpr01qppf5bp7egcvo9pdpr01qppf5bp7f0'; // Replace with your Finnhub API key
+      const category = 'general';
+      const url = `https://finnhub.io/api/v1/news?category=${category}&token=${apiKey}`;
 
-  // Handle file analysis
-  const handleAnalysis = () => {
-    if (file) {
-      // Implement file analysis logic here
-      console.log('Analyzing file:', file.name);
-      // This would typically send the file to a backend API
-    } else {
-      alert('Please upload a CSV file first');
-    }
-  };
-
-  // Stock ticker data (static)
-  const stockTickers = [
-    {
-      id: 1,
-      symbol: 'AAPL',
-      name: 'Apple Inc.',
-      price: 178.72,
-      change: 2.34,
-      changePercent: 1.32,
-      chartData: [150, 152, 148, 155, 160, 158, 165, 170, 168, 175, 178],
-      trending: 'up'
-    },
-    {
-      id: 2,
-      symbol: 'MSFT',
-      name: 'Microsoft Corp.',
-      price: 338.11,
-      change: -1.25,
-      changePercent: -0.37,
-      chartData: [320, 325, 330, 328, 335, 340, 338, 342, 339, 336, 338],
-      trending: 'down'
-    },
-    {
-      id: 3,
-      symbol: 'GOOGL',
-      name: 'Alphabet Inc.',
-      price: 131.86,
-      change: 0.94,
-      changePercent: 0.72,
-      chartData: [125, 127, 129, 128, 130, 132, 131, 133, 132, 130, 131],
-      trending: 'up'
-    },
-    {
-      id: 4,
-      symbol: 'AMZN',
-      name: 'Amazon.com Inc.',
-      price: 127.74,
-      change: 1.56,
-      changePercent: 1.24,
-      chartData: [120, 122, 121, 123, 125, 124, 126, 128, 127, 126, 127],
-      trending: 'up'
-    }
-  ];
-
-  // News data (static)
-  const newsItems = [
-    {
-      id: 1,
-      title: 'Financial Markets Update',
-      description: 'Global markets show signs of recovery as inflation rates stabilize.',
-      date: 'May 15, 2023',
-      source: 'Financial Times'
-    },
-    {
-      id: 2,
-      title: 'New Investment Opportunities',
-      description: 'Emerging markets present promising investment opportunities for Q3 2023.',
-      date: 'May 12, 2023',
-      source: 'Bloomberg'
-    },
-    {
-      id: 3,
-      title: 'Personal Finance Tips',
-      description: 'Expert advice on managing personal finances during economic uncertainty.',
-      date: 'May 10, 2023',
-      source: 'Forbes'
-    }
-  ];
-
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-        ease: "easeOut"
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        const formattedNews = data.map((item, index) => ({
+          id: index + 1,
+          title: item.headline,
+          description: item.summary,
+          date: new Date(item.datetime * 1000).toLocaleDateString(),
+          source: item.source,
+          url: item.url,
+        }));
+        setNewsItems(formattedNews);
+      } catch (error) {
+        console.error('Error fetching financial news:', error);
       }
-    }
-  };
+    };
 
-  const staggerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2
+    fetchFinancialNews();
+  }, []);
+
+  // Fetch market tickers from Finnhub API
+  useEffect(() => {
+    const fetchMarketTickers = async () => {
+      const apiKey = 'cvo9pdpr01qppf5bp7egcvo9pdpr01qppf5bp7f0'; // Replace with your Finnhub API key
+      const symbols = ['AAPL', 'MSFT', 'GOOGL', 'AMZN']; // Add more symbols as needed
+      const requests = symbols.map(symbol =>
+        fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${apiKey}`)
+          .then(response => response.json())
+          .then(data => ({
+            symbol,
+            price: data.c,
+            change: data.d,
+            changePercent: data.dp,
+            trending: data.d >= 0 ? 'up' : 'down',
+            chartData: [] // Placeholder for chart data
+          }))
+      );
+
+      try {
+        const results = await Promise.all(requests);
+        setStockTickers(results);
+      } catch (error) {
+        console.error('Error fetching market tickers:', error);
       }
+    };
+
+    fetchMarketTickers();
+  }, []);
+
+  // Function to handle search
+  const handleSearch = async () => {
+    if (!searchTerm.trim()) return;
+
+    const apiKey = 'cvo9pdpr01qppf5bp7egcvo9pdpr01qppf5bp7f0'; // Replace with your Finnhub API key
+    const category = 'general';
+    const url = `https://finnhub.io/api/v1/news?category=${category}&token=${apiKey}`;
+
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      const filteredResults = data
+        .filter((item) =>
+          item.headline.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+        .slice(0, 5) // Limit to 5 results
+        .map((item, index) => ({
+          id: index + 1,
+          title: item.headline,
+          description: item.summary,
+          date: new Date(item.datetime * 1000).toLocaleDateString(),
+          source: item.source,
+          url: item.url,
+        }));
+      setSearchResults(filteredResults);
+    } catch (error) {
+      console.error('Error fetching search results:', error);
     }
   };
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.4, ease: "easeOut" }
+  // Pagination logic
+  const paginatedNews = newsItems.slice(
+    (currentPage - 1) * newsPerPage,
+    currentPage * newsPerPage
+  );
+
+  const handleNextPage = () => {
+    if (currentPage * newsPerPage < newsItems.length) {
+      setCurrentPage(currentPage + 1);
     }
   };
 
-  // Mini chart component for stock tickers
-  const MiniChart = ({ data, trending }) => {
-    const maxValue = Math.max(...data);
-    const minValue = Math.min(...data);
-    const range = maxValue - minValue;
-    
-    return (
-      <div className="h-12 w-24 flex items-end">
-        {data.map((value, index) => {
-          const height = range === 0 ? 50 : ((value - minValue) / range) * 100;
-          return (
-            <div 
-              key={index} 
-              className={`w-1 mx-[1px] rounded-t-sm ${trending === 'up' ? 'bg-green-500' : 'bg-red-500'}`}
-              style={{ height: `${height}%` }}
-            ></div>
-          );
-        })}
-      </div>
-    );
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
   };
 
-  // For debugging
+  const openModal = (news) => {
+    setSelectedNews(news);
+  };
+
+  const closeModal = () => {
+    setSelectedNews(null);
+  };
 
   return (
     <div className="min-h-screen bg-[#F0F2F5]">
@@ -183,17 +175,19 @@ const Dashboard = () => {
             className="max-w-7xl mx-auto space-y-8"
             initial="hidden"
             animate="visible"
-            variants={staggerVariants}
+            variants={{
+              hidden: { opacity: 0 },
+              visible: { opacity: 1, transition: { staggerChildren: 0.2 } },
+            }}
           >
-            {/* Search Container with Dynamic Gradient */}
-            <motion.div 
+            {/* Search Container */}
+            <motion.div
               className="relative overflow-hidden rounded-2xl shadow-lg"
-              variants={containerVariants}
               onMouseMove={handleMouseMove}
               ref={searchContainerRef}
               style={{
                 backgroundImage: `radial-gradient(circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(0, 123, 255, 0.2), transparent 60%)`,
-                backgroundColor: '#ffffff'
+                backgroundColor: '#ffffff',
               }}
             >
               <div className="p-8 md:p-12">
@@ -203,9 +197,9 @@ const Dashboard = () => {
                 <div className="max-w-4xl mx-auto relative">
                   <input
                     type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search for transactions, goals, or financial insights..."
+                    placeholder="Search for financial news..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full p-4 pl-12 pr-12 rounded-full border border-[#DEE2E6] bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#007BFF] focus:border-transparent transition-all text-[#495057]"
                   />
                   <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#6C757D]" size={20} />
@@ -213,123 +207,95 @@ const Dashboard = () => {
                     className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[#007BFF] hover:text-[#0056B3] transition-colors"
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
+                    onClick={handleSearch}
                   >
                     <FiArrowRight size={20} />
                   </motion.button>
                 </div>
-              </div>
-            </motion.div>
-
-            {/* File Upload Container */}
-            <motion.div 
-              className="bg-white rounded-xl shadow-md overflow-hidden border border-[#E0E0E0]"
-              variants={containerVariants}
-            >
-              <div className="p-6 md:p-8">
-                <h2 className="text-xl font-semibold mb-4 text-[#212529]">
-                  Upload Financial Data
-                </h2>
-                <div className="border-2 border-dashed border-[#DEE2E6] rounded-lg p-6 text-center">
-                  <motion.div
-                    className="flex flex-col items-center"
-                    whileHover={{ scale: 1.02 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <FiUpload className="text-[#6C757D] mb-3" size={36} />
-                    <p className="mb-4 text-[#495057]">
-                      {file ? `Selected: ${file.name}` : 'Upload a CSV file to analyze your financial data'}
-                    </p>
-                    <div className="flex flex-wrap gap-3 justify-center">
-                      <label className="px-4 py-2 bg-[#E9ECEF] text-[#495057] rounded-lg hover:bg-[#DEE2E6] transition-colors cursor-pointer">
-                        <input
-                          type="file"
-                          accept=".csv"
-                          onChange={handleFileChange}
-                          className="hidden"
-                        />
-                        Choose File
-                      </label>
-                      <motion.button
-                        className="px-4 py-2 bg-[#007BFF] text-white rounded-lg hover:bg-[#0056B3] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-                        onClick={handleAnalysis}
-                        disabled={!file}
-                        whileHover={{ scale: 1.03 }}
-                        whileTap={{ scale: 0.97 }}
+                {searchResults.length > 0 && (
+                  <div className="mt-6 space-y-4">
+                    {searchResults.map((result) => (
+                      <div
+                        key={result.id}
+                        className="p-4 border border-[#DEE2E6] rounded-lg hover:shadow-md transition-shadow bg-[#FAFAFA] cursor-pointer"
+                        onClick={() => window.open(result.url, '_blank')}
                       >
-                        <FiFileText className="mr-2" />
-                        Analyze
-                      </motion.button>
-                    </div>
-                  </motion.div>
-                </div>
+                        <h3 className="font-medium text-[#212529]">{result.title}</h3>
+                        <p className="text-[#6C757D] mt-1">{result.description}</p>
+                        <div className="flex justify-between items-center mt-2 text-sm text-[#ADB5BD]">
+                          <span>{result.date}</span>
+                          <span>Source: {result.source}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </motion.div>
-
-            {/* Stock Tickers Container - NEW SECTION */}
-            <motion.div 
+            {/* Market Tickers Container */}
+            <motion.div
               className="bg-white rounded-xl shadow-md overflow-hidden border border-[#E0E0E0]"
-              variants={containerVariants}
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+              }}
             >
               <div className="p-6 md:p-8">
                 <h2 className="text-xl font-semibold mb-4 text-[#212529]">
                   Market Tickers
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {stockTickers.map((stock) => (
+                  {stockTickers.map((stock, index) => (
                     <motion.div
-                      key={stock.id}
+                      key={index}
                       className="p-4 border border-[#DEE2E6] rounded-lg hover:shadow-md transition-shadow"
-                      variants={itemVariants}
                       whileHover={{ y: -5 }}
                       transition={{ duration: 0.2 }}
                     >
                       <div className="flex justify-between items-start mb-2">
                         <div>
-                          <h3 className="font-bold text-lg text-[#212529]">{stock.symbol}</h3>
-                          <p className="text-sm text-[#6C757D]">{stock.name}</p>
+                          <h3 className="font-bold text-lg text-[#212529]">{stock.symbol || 'N/A'}</h3>
+                          <p className="text-sm text-[#6C757D]">{stock.name || 'Unknown'}</p>
                         </div>
                         <div className={`flex items-center ${stock.trending === 'up' ? 'text-green-500' : 'text-red-500'}`}>
                           {stock.trending === 'up' ? <FiTrendingUp size={18} /> : <FiTrendingDown size={18} />}
                         </div>
                       </div>
-                      
                       <div className="flex justify-between items-end mt-3">
                         <div>
-                          <p className="text-xl font-semibold text-[#212529]">${stock.price.toFixed(2)}</p>
+                          <p className="text-xl font-semibold text-[#212529]">
+                            ${stock.price !== undefined ? stock.price.toFixed(2) : '0.00'}
+                          </p>
                           <p className={`text-sm ${stock.change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                            {stock.change >= 0 ? '+' : ''}{stock.change.toFixed(2)} ({stock.change >= 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%)
+                            {stock.change !== undefined ? (stock.change >= 0 ? '+' : '') + stock.change.toFixed(2) : '0.00'}
+                            ({stock.changePercent !== undefined ? (stock.changePercent >= 0 ? '+' : '') + stock.changePercent.toFixed(2) : '0.00'}%)
                           </p>
                         </div>
-                        <MiniChart data={stock.chartData} trending={stock.trending} />
+                        <MiniChart data={stock.chartData || []} trending={stock.trending} />
                       </div>
                     </motion.div>
                   ))}
                 </div>
               </div>
             </motion.div>
-
             {/* News Container */}
-            <motion.div 
+            <motion.div
               className="bg-white rounded-xl shadow-md overflow-hidden border border-[#E0E0E0]"
-              variants={containerVariants}
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+              }}
             >
               <div className="p-6 md:p-8">
                 <h2 className="text-xl font-semibold mb-4 text-[#212529]">
                   Financial News & Updates
                 </h2>
-                <motion.div
-                  className="space-y-4"
-                  variants={staggerVariants}
-                  initial="hidden"
-                  animate="visible"
-                >
-                  {newsItems.map((item) => (
+                <motion.div className="space-y-4">
+                  {paginatedNews.map((item) => (
                     <motion.div
                       key={item.id}
-                      className="p-4 border border-[#DEE2E6] rounded-lg hover:shadow-md transition-shadow bg-[#FAFAFA]"
-                      variants={itemVariants}
-                      whileHover={{ x: 5 }}
-                      transition={{ duration: 0.2 }}
+                      className="p-4 border border-[#DEE2E6] rounded-lg hover:shadow-md transition-shadow bg-[#FAFAFA] cursor-pointer"
+                      onClick={() => openModal(item)}
                     >
                       <h3 className="font-medium text-[#212529]">{item.title}</h3>
                       <p className="text-[#6C757D] mt-1">{item.description}</p>
@@ -340,9 +306,30 @@ const Dashboard = () => {
                     </motion.div>
                   ))}
                 </motion.div>
+                <div className="flex justify-between items-center mt-6">
+                  <button
+                    className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                    onClick={handlePrevPage}
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </button>
+                  <span className="text-sm text-gray-500">
+                    Page {currentPage} of {Math.ceil(newsItems.length / newsPerPage)}
+                  </span>
+                  <button
+                    className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                    onClick={handleNextPage}
+                    disabled={currentPage * newsPerPage >= newsItems.length}
+                  >
+                    Next
+                  </button>
+                </div>
               </div>
             </motion.div>
-            </motion.div>
+
+
+          </motion.div>
         </div>
       ) : (
         <div className="pt-24 px-4 md:px-6 lg:px-8 pb-20 flex justify-center items-center">
@@ -361,7 +348,6 @@ const Dashboard = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => {
-                // Navigate to login page or open login modal
                 console.log('Navigate to login');
               }}
             >
@@ -370,9 +356,9 @@ const Dashboard = () => {
           </motion.div>
         </div>
       )}
+      <NewsModal isOpen={!!selectedNews} onClose={closeModal} news={selectedNews} />
     </div>
   );
 };
 
 export default Dashboard;
-
