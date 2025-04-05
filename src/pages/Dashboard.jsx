@@ -4,7 +4,7 @@ import { FiSearch, FiUpload, FiFileText, FiArrowRight } from 'react-icons/fi';
 import Navbar from '../components/Navbar';
 
 const Dashboard = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(falsegit);
   const [searchQuery, setSearchQuery] = useState('');
   const [file, setFile] = useState(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
