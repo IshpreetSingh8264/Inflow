@@ -74,7 +74,8 @@ const Navbar = () => {
             transition={{ type: "spring", stiffness: 400, damping: 10 }}
           >
             <Link to="/" className="flex items-center">
-              <span className="text-xl font-bold text-[#000000] font-inter">Inflow</span>
+              <span className="text-xl font-bold text-[#0027ff] font-inter">In</span>
+              <span className="text-xl font-bold text-[#000000] font-inter">flow</span>
             </Link>
           </motion.div>
 

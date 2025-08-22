@@ -36,7 +36,7 @@ const Dashboard = () => {
   const [newsItems, setNewsItems] = useState([]);
   const [selectedNews, setSelectedNews] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const newsPerPage = 10;
+  const newsPerPage = 5;
   const searchContainerRef = useRef(null);
   const [stockTickers, setStockTickers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
